@@ -38,8 +38,8 @@
     if(!NATS.paused) return true;
     NATS.paused  = false;
     
-    NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  // Adust startTime as needed so that a paused timer can continue accordingly
-    if(NATS.timer!=null) clearInterval(NATS.timer);                      // Make sure only one timer is counting!
+    NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
+    if(NATS.timer!=null) clearInterval(NATS.timer);                       // Make sure only one timer is counting!
     NATS.timer = setInterval(NATS.refresh, 100);
   }
   
@@ -58,20 +58,21 @@
     NATS.elapsedTime = 0;
     NATS.startTime = new Date();
     NATS.setDirection();
-    if(NATS.paused) NATS.refresh();
   }
     
   NATS.refresh = function(){
-    if(!NATS.paused) NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime(); 
+    if(!NATS.paused) NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime(); // Refresh the elapsed time
     var timeLeft = 0;
-    var min = 0;
-    var sec = 0;
+    var min      = 0;
+    var sec      = 0;
     
     // Determine the minutes and seconds to display
     if(NATS.countUp){
+      // We're counting up!
       min = Math.floor( NATS.elapsedTime / 60000);
       sec = Math.floor((NATS.elapsedTime % 60000) / 1000);
     } else {
+      // Woohoo! We're counting down!
       timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
       min = timeLeft < 0 ? Math.ceil(timeLeft/60000) : Math.floor(timeLeft/60000);
       sec = Math.floor((Math.abs(timeLeft) % 60000) / 1000);
@@ -80,18 +81,19 @@
     // Refresh the counter
     document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
     
-    // Determine status of speaker
-    if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
+    // Determine status of timer
+    if (NATS.paused) {
+      NATS.body.setAttribute("class", "paused"); 
+    } else if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
       NATS.body.setAttribute("class", "overtime");
     } else if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) {
       NATS.body.setAttribute("class", "warning");
-    } else if (!NATS.paused) {
-      NATS.body.setAttribute("class", "counting");
     } else {
-      NATS.body.setAttribute("class", "");
-    }
+      NATS.body.setAttribute("class", "counting");
+    } 
   }  
   
+  // Pads a number with leading zeros
   NATS.pad = function(num, count){
     var n = Math.abs(num) + '';
     while(n.length < count) { n = "0" + n }
@@ -135,6 +137,7 @@ body {
 #lights {
   float: right;
   margin-right: 50px;
+  position: relative;
 }
 
 #counting, #warning, #overtime {
@@ -145,6 +148,21 @@ body.counting #counting, body.warning #counting, body.overtime #counting,
 body.warning #warning, body.overtime #warning,
 body.overtime #overtime {
   opacity:1.0;
+}
+
+#paused {
+  display: none;
+}
+
+body.paused #paused{
+  letter-spacing: 10px;
+  display: block;
+  font-family: monospace;
+  font-size: 100px;
+  font-weight: bold;
+  position: absolute;
+  right: 15px;
+  top: 45px;
 }
 </style>
 
@@ -164,6 +182,7 @@ body.overtime #overtime {
    <p style="clear:both"  />
    <div id="Timer"> </div>
    <div id="lights">
+     <div id="paused">(paused)</div>
      <img src="greenLight.png"  id="counting"/>
      <img src="yellowLight.png" id="warning"/>
      <img src="redLight.png"    id="overtime"/>
