@@ -3,8 +3,11 @@
 <script type="text/javascript">
   //
   // IdeaCamp Davao Timer
-  // Inspired by Nathaniel 'Nats' Jayme's original work
-  // License pending. You have no right whatsoever to use this script!!! ;-)
+  // Copyright Nathaniel 'Nats' B. Jayme
+  // In cooperation with Mark 'Relaxdiego' Maglana 
+  // and George 'Mad Guitar Skillz' Tujan
+  // Licensed under the Creative Commons Attribution 3.0 License
+  // More info at http://creativecommons.org/licenses/by/3.0/
   //
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
@@ -13,60 +16,61 @@
   NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
   NATS.countUp    = true; // If false, timer counts down
   
-  // EXAMPLE: talkLength of 15 and timeToWarn of 13 means that
+  // EXAMPLE: (assuming countUp is true)
+  // talkLength of 15 and timeToWarn of 13 means that
   // the warning signal will be shown at 13:00 and the overtime 
   // signal will be shown at 15:00. If you want to specify any of
   // the two values in seconds instead, just say x/60 where x is
-  // the time in seconds.
+  // the time in seconds. For instance, a timeToWarn of 5/60 means
+  // the warning signal will be displayed at 00:05
   
   /*******************************************************************
-
      WARNING NI DODONG:
      DO NOT CHANGE ANYTHING BELOW UNLESS YOU ARE NATSKY, MARK, 
      GEORGE, OR YOU KNOW WHAT YOU'RE DOING! HEE HEE HEE.
-   
   *******************************************************************/
   
   NATS.startTime   = null;
   NATS.elapsedTime = 0;    // milliseconds elapsed since time start
   NATS.paused      = true;
 
-  NATS.startTimer = function(countUp){
+  NATS.start = function(countUp){
     if(!NATS.paused && NATS.countUp==countUp) return true;
     NATS.paused  = false;
     NATS.countUp = countUp;
     
     NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  // Adust startTime as needed so that a paused timer can continue accordingly
     if(NATS.timer!=null) clearInterval(NATS.timer);                      // Make sure only one timer is counting!
-    NATS.timer = setInterval(NATS.displayTime, 30);
+    NATS.timer = setInterval(NATS.refresh, 100);
   }
   
-  NATS.pauseTimer = function(){
+  NATS.pause = function(){
     if(NATS.timer!=null) clearInterval(NATS.timer);
+    NATS.body.setAttribute("class", "");
     NATS.paused = true;
   }
   
   NATS.reset = function(){
-    NATS.pauseTimer();
+    NATS.pause();
     NATS.timer = null;
     NATS.elapsedTime = 0;
     document.getElementById("Timer").innerHTML = "00:00";
     NATS.body.setAttribute("class", "");
   }
     
-  NATS.displayTime = function(){
+  NATS.refresh = function(){
     NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime(); 
     var timeLeft = 0;
     var min = 0;
     var sec = 0;
     
-    // Determine the minutes and seconds
+    // Determine the minutes and seconds to display
     if(NATS.countUp){
       min = Math.floor( NATS.elapsedTime / 60000);
       sec = Math.floor((NATS.elapsedTime % 60000) / 1000);
     } else {
       timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
-      min = Math.round( timeLeft / 60000);
+      min = timeLeft < 0 ? Math.ceil(timeLeft/60000) : Math.floor(timeLeft/60000);
       sec = Math.floor((Math.abs(timeLeft) % 60000) / 1000);
     }
 
@@ -106,7 +110,7 @@ body {
 
 #Timer {
   font-family: monospace;
-  font-size: 350px;
+  font-size: 300px;
   font-weight: bold;
   letter-spacing: -30px;
   margin-right: 50px;
@@ -146,9 +150,9 @@ body.overtime #overtime
 </head>
 <body>
    <div style="float:left">
-     <input type="button" id="countUp" value="Count Up" onclick="NATS.startTimer(true);" />
-     <input type="button" id="countDown" value="Count Down" onclick="NATS.startTimer(false);" />
-     <input type="button" id="pause" value="Pause" onclick="NATS.pauseTimer();" />
+     <input type="button" id="countUp" value="Count Up" onclick="NATS.start(true);" />
+     <input type="button" id="countDown" value="Count Down" onclick="NATS.start(false);" />
+     <input type="button" id="pause" value="Pause" onclick="NATS.pause();" />
    </div>
    <div style="float:right">
      <input type="button" id="reset" value="Reset" onclick="NATS.reset();" />
