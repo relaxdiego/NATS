@@ -1,121 +1,138 @@
 <html>
 <head>
-<!-- Original work by Nathaniel B. Jayme. License is pending. You have no right whatsoever to use this file! -->
 <script type="text/javascript">
-  var currMinute = 15;
-  var currSecond = 0;
+  //
+  // IdeaCamp Davao Timer
+  // Inspired by Nathaniel B. Jayme's original work
+  // License pending. You have no right whatsoever to use this script!!! ;-)
+  //
+  
+  var NATS = {}; // Create a namespace for this script. Because I'm OC like that ;-)
+  
+  NATS.talkLength = 15;   // Expected length of the talk in minutes
+  NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
+  NATS.countUp    = true; // If false, timer counts down
+  
+  // EXAMPLE: talkLength of 15 and timeToWarn of 13 means that
+  // the warning signal will be shown at 13:00 and the overtime 
+  // signal will be shown at 15:00. If you want to specify any of
+  // the two values in seconds instead, just say x/60 where x is
+  // the second value you want to specify.
+  
+  NATS.startTime   = null;
+  NATS.elapsedTime = 0;    // milliseconds elapsed since time start
+  NATS.paused      = true;
 
- function udf_bMessage(cMsg)
- {
-   document.getElementById("msg").innerHTML = cMsg;
- }
+  NATS.startTimer = function(countUp){
+    if(!NATS.paused && NATS.countUp==countUp) return true;
+    NATS.paused = false;
+    
+    NATS.countUp = countUp;
+    
+    // Adust startTime as needed so that a paused timer can continue accordingly
+    NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  
 
- function udf_bCountDown()
-  {
-     var cTempMinute = currMinute;
-     var cTempSecond = currSecond;
-     if (cTempSecond == 0)
-     {
-        cTempSecond = 59;
-        cTempMinute--;
-        if(cTempMinute == -1)
-        {
-          udf_bMessage("Overtime!!!");
-        }
-     }
-     else
-     {
-        cTempSecond--;
-     }
-     currMinute = cTempMinute;
-     currSecond = cTempSecond;
-     udf_bDisplayTimeLeft();
-  }
-
-  function udf_bDisplayTimeLeft()
-  {
-    var bIsOverTime = currMinute < 0;
-    var cTimeLeft= bIsOverTime?"-":"";
-    cTimeLeft += String("0" + Math.abs(currMinute)).substr(-2);
-    cTimeLeft +=":";
-    cTimeLeft += String("0" + currSecond).substr(-2);
-    document.getElementById("Timer").innerHTML=cTimeLeft;
-  }
-
-  var timeInterval = null;
-  function udf_bTimerStart()
-  {
-     timeInterval = setInterval(udf_bCountDown,1000);
-  }
-
-  function udf_bTimerStop()
-  {
-     clearInterval(timeInterval);
-  }
-
-  function udf_bTimerReset()
-  {
-    udf_bTimerStop();
-    currMinute = 15;
-    currSecond = 0;
-    udf_bMessage("");
-    udf_bDisplayTimeLeft();
-  }
-
-  function udf_bContrast()
-  {
-    var lv_oBody = document.getElementsByTagName("body")[0];
-    if (lv_oBody.getAttribute("class") == "whiteoverblack")
-    {
-       lv_oBody.setAttribute("class","blackoverwhite");
-       return;
-    }
-    lv_oBody.setAttribute("class","whiteoverblack");
-  } 
-
-  function udf_bInitialize()
-  {
-     window.removeEventListener("load",udf_bInitialize,false);
-     udf_bDisplayTimeLeft();
+    NATS.timer = setInterval(NATS.displayTime, 30);
   }
   
-  window.addEventListener("load",udf_bInitialize,false);
+  NATS.pauseTimer = function(){
+    if(NATS.timer!=null) clearInterval(NATS.timer);
+    NATS.paused = true;
+  }
+  
+  NATS.reset = function(){
+    NATS.pauseTimer();
+    NATS.timer = null;
+    NATS.elapsedTime  = 0;
+    document.getElementById("Timer").innerHTML = "00:00";
+    NATS.body.setAttribute("class", "");
+  }
+    
+  NATS.displayTime = function(){
+    NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime(); 
+    var timeLeft = 0;
+    var min = 0;
+    var sec = 0;
+    
+    if(NATS.countUp){
+      min = Math.floor( NATS.elapsedTime / 60000);
+      sec = Math.floor((NATS.elapsedTime % 60000) / 1000);
+    } else {
+      timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
+      min = Math.abs(timeLeft / 60000) > 1 ? Math.floor( timeLeft / 60000) : 0;
+      sec = Math.floor((Math.abs(timeLeft) % 60000) / 1000);
+    }
+
+    document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
+    
+    if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
+      NATS.body.setAttribute("class", "overtime");
+    } else if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) {
+      NATS.body.setAttribute("class", "warning");
+    }
+  }  
+  
+  NATS.pad = function(num, count){
+    var n = Math.abs(num) + '';
+    while(n.length < count) { n = "0" + n }
+    if(num<0) n = "-" + n;
+    return n;
+  }
+  
+  NATS.initialize = function() {
+    window.removeEventListener("load", NATS.initialize, false);
+    NATS.body = document.getElementsByTagName("body")[0];
+    NATS.reset();
+  }
+
+  window.addEventListener("load", NATS.initialize, false);
   
 </script>
 <style type="text/css">
-body.blackoverwhite
-{
-  background-color:white;
-  color:black;
+body {
+  background-color: #000;
+  color: #fff;
 }
 
-body.whiteoverblack
-{
-  background-color:black;
-  color:white;
+body.overtime {
+  background-color: #900;
+  color: #fff;
 }
 
-#Timer
-{
-  text-align:center;
-  font-size:300px;
+body.warning {
+  background-color: #ff0;
+  color: #090;
 }
-#msg
-{
-  text-align:center;
-  font-size:100px;
+
+#Timer {
+  font-family: monospace;
+  font-size: 350px;
+  font-weight: bold;
+  letter-spacing: -30px;
+  margin-right: 50px;
+  text-align: right;
+}
+
+#msg {
+  text-align: center;
+  font-size: 100px;
+}
+
+#countUp, #countDown, #pause, #reset {
+  height: 50px;
+  width: 90px;
 }
 
 </style>
 </head>
-<body class="whiteoverblack">
+<body>
    <div style="float:left">
-     <input type="button" value="Start" onclick="udf_bTimerStart();" />
-     <input type="button" value="Stop" onclick="udf_bTimerStop();" />
-     <input type="button" value="Color contrast" onclick="udf_bContrast();" />
+     <input type="button" id="countUp" value="Count Up" onclick="NATS.startTimer(true);" />
+     <input type="button" id="countDown" value="Count Down" onclick="NATS.startTimer(false);" />
+     <input type="button" id="pause" value="Pause" onclick="NATS.pauseTimer();" />
    </div>
    <div style="float:right">
-     <input type="button" value="Reset" onclick="udf_bTimerReset();" />
+     <input type="button" id="reset" value="Reset" onclick="NATS.reset();" />
    </div>
    <p style="clear:both"  />
 
