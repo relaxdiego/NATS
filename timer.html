@@ -24,14 +24,14 @@
   NATS.paused      = true;
 
   NATS.startTimer = function(countUp){
-    if(!NATS.paused && NATS.countUp==countUp) return true;
+    if(NATS.countUp==countUp) return true;
     NATS.paused = false;
-    
     NATS.countUp = countUp;
     
     // Adust startTime as needed so that a paused timer can continue accordingly
     NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  
-
+    
+    if(NATS.timer!=null) clearInterval(NATS.timer);  // Make sure only one timer is running!
     NATS.timer = setInterval(NATS.displayTime, 30);
   }
   
