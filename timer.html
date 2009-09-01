@@ -3,11 +3,11 @@
 <script type="text/javascript">
   //
   // IdeaCamp Davao Timer
-  // Inspired by Nathaniel B. Jayme's original work
+  // Inspired by Nathaniel 'Nats' Jayme's original work
   // License pending. You have no right whatsoever to use this script!!! ;-)
   //
   
-  var NATS = {}; // Create a namespace for this script. Because I'm OC like that ;-)
+  var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
   
   NATS.talkLength = 15;   // Expected length of the talk in minutes
   NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
@@ -63,7 +63,9 @@
       sec = Math.floor((Math.abs(timeLeft) % 60000) / 1000);
     }
 
-    document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
+    document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + 
+                                                 NATS.pad(min, 2) + ":" + 
+                                                 NATS.pad(sec, 2);
     
     if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
       NATS.body.setAttribute("class", "overtime");
@@ -75,7 +77,6 @@
   NATS.pad = function(num, count){
     var n = Math.abs(num) + '';
     while(n.length < count) { n = "0" + n }
-    if(num<0) n = "-" + n;
     return n;
   }
   
