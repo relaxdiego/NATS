@@ -14,9 +14,8 @@
   
   NATS.talkLength = 15;   // Expected length of the talk in minutes
   NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
-  NATS.countUp    = true; // If false, timer counts down
   
-  // EXAMPLE: (assuming countUp is true)
+  // EXAMPLE: (assuming count up is true)
   // talkLength of 15 and timeToWarn of 13 means that
   // the warning signal will be shown at 13:00 and the overtime 
   // signal will be shown at 15:00. If you want to specify any of
@@ -33,11 +32,11 @@
   NATS.startTime   = null;
   NATS.elapsedTime = 0;    // milliseconds elapsed since time start
   NATS.paused      = true;
+  NATS.countUp     = true;
 
-  NATS.start = function(countUp){
-    if(!NATS.paused && NATS.countUp==countUp) return true;
+  NATS.start = function(){
+    if(!NATS.paused) return true;
     NATS.paused  = false;
-    NATS.countUp = countUp;
     
     NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  // Adust startTime as needed so that a paused timer can continue accordingly
     if(NATS.timer!=null) clearInterval(NATS.timer);                      // Make sure only one timer is counting!
@@ -50,13 +49,20 @@
     NATS.refresh();
   }
   
+  NATS.setDirection = function(){
+    NATS.countUp = document.getElementById("direction").selectedIndex==0;
+    if(NATS.paused) NATS.refresh();
+  }
+  
   NATS.reset = function(){
+    NATS.elapsedTime = 0;
     NATS.startTime = new Date();
+    NATS.setDirection();
     if(NATS.paused) NATS.refresh();
   }
     
   NATS.refresh = function(){
-    NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime(); 
+    if(!NATS.paused) NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime(); 
     var timeLeft = 0;
     var min = 0;
     var sec = 0;
@@ -101,6 +107,7 @@
   window.addEventListener("load", NATS.initialize, false);
   
 </script>
+
 <style type="text/css">
 body {
   background-color: #000;
@@ -116,9 +123,13 @@ body {
   text-align: right;
 }
 
-#countUp, #countDown, #pause, #reset {
+#start, #pause, #reset {
   height: 50px;
   width: 90px;
+}
+
+#direction {
+  font-size: 15px;
 }
 
 #lights {
@@ -130,31 +141,28 @@ body {
   opacity:0.05;
 }
 
-body.counting #counting,
-body.warning #counting,
-body.warning #warning,
-body.overtime #counting,
-body.overtime #warning,
-body.overtime #overtime
-{
+body.counting #counting, body.warning #counting, body.overtime #counting,
+body.warning #warning, body.overtime #warning,
+body.overtime #overtime {
   opacity:1.0;
 }
-
 </style>
+
 </head>
 <body>
    <div style="float:left">
-     <input type="button" id="countUp" value="Count Up" onclick="NATS.start(true);" />
-     <input type="button" id="countDown" value="Count Down" onclick="NATS.start(false);" />
+     <input type="button" id="start" value="Start" onclick="NATS.start();" />
      <input type="button" id="pause" value="Pause" onclick="NATS.pause();" />
+     <select id="direction" onchange="NATS.setDirection()">
+       <option>Count up</option>
+       <option>Count down</option>
+     </select>
    </div>
    <div style="float:right">
      <input type="button" id="reset" value="Reset" onclick="NATS.reset();" />
    </div>
    <p style="clear:both"  />
-
-   <div id="Timer">
-   </div>
+   <div id="Timer"> </div>
    <div id="lights">
      <img src="greenLight.png"  id="counting"/>
      <img src="yellowLight.png" id="warning"/>
