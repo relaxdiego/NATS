@@ -19,19 +19,22 @@
   // the two values in seconds instead, just say x/60 where x is
   // the second value you want to specify.
   
+  // DO NOT CHANGE ANYTHING BELOW UNLESS YOU KNOW WHAT YOU'RE DOING!
+  
   NATS.startTime   = null;
   NATS.elapsedTime = 0;    // milliseconds elapsed since time start
   NATS.paused      = true;
 
   NATS.startTimer = function(countUp){
-    if(NATS.countUp==countUp) return true;
+    if(!NATS.paused && NATS.countUp==countUp) return true;
     NATS.paused = false;
     NATS.countUp = countUp;
     
     // Adust startTime as needed so that a paused timer can continue accordingly
     NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  
     
-    if(NATS.timer!=null) clearInterval(NATS.timer);  // Make sure only one timer is running!
+    if(NATS.timer!=null) clearInterval(NATS.timer);  // Make sure only one timer is counting!
+    
     NATS.timer = setInterval(NATS.displayTime, 30);
   }
   
@@ -54,6 +57,7 @@
     var min = 0;
     var sec = 0;
     
+    // Determine the minutes and seconds
     if(NATS.countUp){
       min = Math.floor( NATS.elapsedTime / 60000);
       sec = Math.floor((NATS.elapsedTime % 60000) / 1000);
@@ -63,14 +67,18 @@
       sec = Math.floor((Math.abs(timeLeft) % 60000) / 1000);
     }
 
+    // Refresh the counter
     document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + 
                                                  NATS.pad(min, 2) + ":" + 
                                                  NATS.pad(sec, 2);
     
+    // Determine status of speaker
     if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
       NATS.body.setAttribute("class", "overtime");
     } else if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) {
       NATS.body.setAttribute("class", "warning");
+    } else {
+      NATS.body.setAttribute("class", "counting");
     }
   }  
   
@@ -95,16 +103,6 @@ body {
   color: #fff;
 }
 
-body.overtime {
-  background-color: #900;
-  color: #fff;
-}
-
-body.warning {
-  background-color: #ff0;
-  color: #090;
-}
-
 #Timer {
   font-family: monospace;
   font-size: 350px;
@@ -124,6 +122,25 @@ body.warning {
   width: 90px;
 }
 
+#lights {
+  float: right;
+  margin-right: 50px;
+}
+
+#counting, #warning, #overtime {
+  opacity:0.05;
+}
+
+body.counting #counting,
+body.warning #counting,
+body.warning #warning,
+body.overtime #counting,
+body.overtime #warning,
+body.overtime #overtime
+{
+  opacity:1.0;
+}
+
 </style>
 </head>
 <body>
@@ -139,7 +156,10 @@ body.warning {
 
    <div id="Timer">
    </div>
-   <div id="msg">
+   <div id="lights">
+     <img src="greenLight.png"  id="counting"/>
+     <img src="yellowLight.png" id="warning"/>
+     <img src="redLight.png"    id="overtime"/>
    </div>
 </body>
 </html>
