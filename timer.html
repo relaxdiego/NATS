@@ -40,7 +40,7 @@
     
     NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
     if(NATS.timer!=null) clearInterval(NATS.timer);                       // Make sure only one timer is counting!
-    NATS.timer = setInterval(NATS.refresh, 100);
+    NATS.timer = setInterval(NATS.refresh, 10);
   }
   
   NATS.pause = function(){
@@ -161,8 +161,9 @@ body.paused #paused{
   font-size: 100px;
   font-weight: bold;
   position: absolute;
-  right: 15px;
+  text-align: center;
   top: 45px;
+  width: 100%;
 }
 </style>
 
