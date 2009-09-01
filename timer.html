@@ -17,9 +17,15 @@
   // the warning signal will be shown at 13:00 and the overtime 
   // signal will be shown at 15:00. If you want to specify any of
   // the two values in seconds instead, just say x/60 where x is
-  // the second value you want to specify.
+  // the time in seconds.
   
-  // DO NOT CHANGE ANYTHING BELOW UNLESS YOU KNOW WHAT YOU'RE DOING!
+  /*******************************************************************
+
+     WARNING NI DODONG:
+     DO NOT CHANGE ANYTHING BELOW UNLESS YOU ARE NATSKY, MARK, 
+     GEORGE, OR YOU KNOW WHAT YOU'RE DOING! HEE HEE HEE.
+   
+  *******************************************************************/
   
   NATS.startTime   = null;
   NATS.elapsedTime = 0;    // milliseconds elapsed since time start
@@ -27,14 +33,11 @@
 
   NATS.startTimer = function(countUp){
     if(!NATS.paused && NATS.countUp==countUp) return true;
-    NATS.paused = false;
+    NATS.paused  = false;
     NATS.countUp = countUp;
     
-    // Adust startTime as needed so that a paused timer can continue accordingly
-    NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  
-    
-    if(NATS.timer!=null) clearInterval(NATS.timer);  // Make sure only one timer is counting!
-    
+    NATS.startTime = new Date((new Date).getTime() - NATS.elapsedTime);  // Adust startTime as needed so that a paused timer can continue accordingly
+    if(NATS.timer!=null) clearInterval(NATS.timer);                      // Make sure only one timer is counting!
     NATS.timer = setInterval(NATS.displayTime, 30);
   }
   
@@ -46,7 +49,7 @@
   NATS.reset = function(){
     NATS.pauseTimer();
     NATS.timer = null;
-    NATS.elapsedTime  = 0;
+    NATS.elapsedTime = 0;
     document.getElementById("Timer").innerHTML = "00:00";
     NATS.body.setAttribute("class", "");
   }
@@ -68,9 +71,7 @@
     }
 
     // Refresh the counter
-    document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + 
-                                                 NATS.pad(min, 2) + ":" + 
-                                                 NATS.pad(sec, 2);
+    document.getElementById("Timer").innerHTML = ((timeLeft < 0) ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
     
     // Determine status of speaker
     if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
