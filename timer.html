@@ -54,6 +54,11 @@
     if(NATS.paused) NATS.refresh();
   }
   
+  NATS.toggleDirection = function(){
+    document.getElementById("direction").selectedIndex = (document.getElementById("direction").selectedIndex==0) ? 1 : 0;
+    NATS.setDirection();
+  }
+  
   NATS.reset = function(){
     NATS.elapsedTime = 0;
     NATS.startTime = new Date();
@@ -100,6 +105,16 @@
     return n;
   }
   
+  NATS.handleKey = function(event){
+    console.log(event.keyCode);
+    switch(event.keyCode){
+      case 83: NATS.start(); break; // S
+      case 80: if(confirm("Are you sure you want to pause?")) NATS.pause(); break; // P
+      case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break; // ESC
+      case 68: NATS.toggleDirection(); break; // D
+    }
+  }
+  
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
     NATS.body = document.getElementsByTagName("body")[0];
@@ -107,6 +122,7 @@
   }
 
   window.addEventListener("load", NATS.initialize, false);
+  document.addEventListener("keydown", NATS.handleKey, false);
   
 </script>
 
@@ -170,15 +186,15 @@ body.paused #paused{
 </head>
 <body>
    <div style="float:left">
-     <input type="button" id="start" value="Start" onclick="NATS.start();" />
-     <input type="button" id="pause" value="Pause" onclick="NATS.pause();" />
-     <select id="direction" onchange="NATS.setDirection()">
+     <input type="button" id="start" value="Start" onclick="NATS.start();" title="Start timer (S)"/>
+     <input type="button" id="pause" value="Pause" onclick="NATS.pause();" title="Pause timer (P)" />
+     <select id="direction" onchange="NATS.setDirection()" title="Direction (D)">
        <option>Count up</option>
        <option>Count down</option>
      </select>
    </div>
    <div style="float:right">
-     <input type="button" id="reset" value="Reset" onclick="NATS.reset();" />
+     <input type="button" id="reset" value="Reset" onclick="NATS.reset();" title="Reset timer (Esc)"/>
    </div>
    <p style="clear:both"  />
    <div id="Timer"> </div>
