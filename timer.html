@@ -1,0 +1,127 @@
+<html>
+<head>
+<script type="text/javascript">
+  var currMinute = 15;
+  var currSecond = 0;
+
+ function udf_bMessage(cMsg)
+ {
+   document.getElementById("msg").innerHTML = cMsg;
+ }
+
+ function udf_bCountDown()
+  {
+     var cTempMinute = currMinute;
+     var cTempSecond = currSecond;
+     if (cTempSecond == 0)
+     {
+        cTempSecond = 59;
+        cTempMinute--;
+        if(cTempMinute == -1)
+        {
+          udf_bMessage("Overtime!!!");
+        }
+     }
+     else
+     {
+        cTempSecond--;
+     }
+     currMinute = cTempMinute;
+     currSecond = cTempSecond;
+     udf_bDisplayTimeLeft();
+  }
+
+  function udf_bDisplayTimeLeft()
+  {
+    var bIsOverTime = currMinute < 0;
+    var cTimeLeft= bIsOverTime?"-":"";
+    cTimeLeft += String("0" + Math.abs(currMinute)).substr(-2);
+    cTimeLeft +=":";
+    cTimeLeft += String("0" + currSecond).substr(-2);
+    document.getElementById("Timer").innerHTML=cTimeLeft;
+  }
+
+  var timeInterval = null;
+  function udf_bTimerStart()
+  {
+     timeInterval = setInterval(udf_bCountDown,1000);
+  }
+
+  function udf_bTimerStop()
+  {
+     clearInterval(timeInterval);
+  }
+
+  function udf_bTimerReset()
+  {
+    udf_bTimerStop();
+    currMinute = 15;
+    currSecond = 0;
+    udf_bMessage("");
+    udf_bDisplayTimeLeft();
+  }
+
+  function udf_bContrast()
+  {
+    var lv_oBody = document.getElementsByTagName("body")[0];
+    if (lv_oBody.getAttribute("class") == "whiteoverblack")
+    {
+       lv_oBody.setAttribute("class","blackoverwhite");
+       return;
+    }
+    lv_oBody.setAttribute("class","whiteoverblack");
+  } 
+
+  function udf_bInitialize()
+  {
+     window.removeEventListener("load",udf_bInitialize,false);
+     udf_bDisplayTimeLeft();
+  }
+  
+  window.addEventListener("load",udf_bInitialize,false);
+  
+</script>
+<style type="text/css">
+body.blackoverwhite
+{
+  background-color:white;
+  color:black;
+}
+
+body.whiteoverblack
+{
+  background-color:black;
+  color:white;
+}
+
+#Timer
+{
+  text-align:center;
+  font-size:300px;
+}
+#msg
+{
+  text-align:center;
+  font-size:100px;
+}
+
+</style>
+</head>
+<body class="whiteoverblack">
+   <div style="float:left">
+     <input type="button" value="Start" onclick="udf_bTimerStart();" />
+     <input type="button" value="Stop" onclick="udf_bTimerStop();" />
+     <input type="button" value="Color contrast" onclick="udf_bContrast();" />
+   </div>
+   <div style="float:right">
+     <input type="button" value="Reset" onclick="udf_bTimerReset();" />
+   </div>
+   <p style="clear:both"  />
+
+   <div id="Timer">
+   </div>
+   <div id="msg">
+   </div>
+</body>
+</html>
+
