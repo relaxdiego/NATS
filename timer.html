@@ -46,16 +46,13 @@
   
   NATS.pause = function(){
     if(NATS.timer!=null) clearInterval(NATS.timer);
-    NATS.body.setAttribute("class", "");
     NATS.paused = true;
+    NATS.refresh();
   }
   
   NATS.reset = function(){
-    NATS.pause();
-    NATS.timer = null;
-    NATS.elapsedTime = 0;
-    document.getElementById("Timer").innerHTML = "00:00";
-    NATS.body.setAttribute("class", "");
+    NATS.startTime = new Date();
+    if(NATS.paused) NATS.refresh();
   }
     
   NATS.refresh = function(){
@@ -82,8 +79,10 @@
       NATS.body.setAttribute("class", "overtime");
     } else if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) {
       NATS.body.setAttribute("class", "warning");
-    } else {
+    } else if (!NATS.paused) {
       NATS.body.setAttribute("class", "counting");
+    } else {
+      NATS.body.setAttribute("class", "");
     }
   }  
   
