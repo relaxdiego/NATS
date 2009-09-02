@@ -80,7 +80,7 @@
     if(NATS.paused){ 
       c += "paused "; 
     } else { 
-      c += "counting "
+      c += "counting ";
       if(NATS.elapsedTime > (NATS.timeToWarn * 60000)) c += "warning ";
       if(NATS.elapsedTime > (NATS.talkLength * 60000)) c += "overtime ";
     }
