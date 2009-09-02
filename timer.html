@@ -12,8 +12,8 @@
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
   
-  NATS.talkLength = 15;   // Expected length of the talk in minutes
-  NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
+  NATS.talkLength = 5/60;   // Expected length of the talk in minutes
+  NATS.timeToWarn = 3/60;   // Time in minutes when warning signal is displayed
   
   // EXAMPLE: (assuming count up is true)
   // talkLength of 15 and timeToWarn of 13 means that
@@ -71,20 +71,20 @@
     var timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
 
     // Redraw the counter
-    var min = Math.floor(NATS.countUp ?  (NATS.elapsedTime / 60000)         : Math.abs(timeLeft/60000));
-    var sec = Math.floor(NATS.countUp ? ((NATS.elapsedTime % 60000) / 1000) : Math.abs(timeLeft) % 60000 / 1000);
+    var min = Math.floor(  NATS.countUp ? (NATS.elapsedTime/60000)      : Math.abs(timeLeft/60000)       );
+    var sec = Math.floor(  NATS.countUp ? (NATS.elapsedTime%60000)/1000 : Math.abs(timeLeft%60000)/1000  );
     NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
     
     // Update status of the timer
-    if (NATS.paused) {
-      NATS.body.setAttribute("class", "paused"); 
-    } else if(NATS.elapsedTime > (NATS.talkLength * 60000)) {
-      NATS.body.setAttribute("class", "overtime");
-    } else if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) {
-      NATS.body.setAttribute("class", "warning");
-    } else {
-      NATS.body.setAttribute("class", "counting");
-    } 
+    var c = "";
+    if (NATS.paused){ 
+      c += "paused "; 
+    } else { 
+      c += "counting "
+      if (NATS.elapsedTime > (NATS.talkLength * 60000)) c += "overtime ";
+      if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) c += "warning ";
+    }
+    NATS.body.setAttribute("class", c);
   }  
   
   // Pads a number with leading zeros
@@ -145,13 +145,13 @@ body {
 }
 
 #counting, #warning, #overtime {
-  opacity:0.05;
+  opacity: 0.05;
 }
 
-body.counting #counting, body.warning #counting, body.overtime #counting,
-body.warning #warning, body.overtime #warning,
+body.counting #counting,
+body.warning #warning,
 body.overtime #overtime {
-  opacity:1.0;
+  opacity: 1.0;
 }
 
 #paused { display: none; }
@@ -162,6 +162,7 @@ body.paused #paused{
   font-family: monospace;
   font-size: 100px;
   font-weight: bold;
+  opacity: 1.0;
   position: absolute;
   text-align: center;
   top: 45px;
@@ -191,10 +192,10 @@ body.counting #start { display: none; }
    <p style="clear:both"  />
    <div id="counter"> </div>
    <div id="lights">
-     <div id="paused">(paused)</div>
      <img src="greenLight.png"  id="counting"/>
      <img src="yellowLight.png" id="warning"/>
      <img src="redLight.png"    id="overtime"/>
+     <div id="paused">(paused)</div>
    </div>
 </body>
 </html>
