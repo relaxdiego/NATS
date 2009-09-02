@@ -35,11 +35,9 @@
   NATS.countUp     = true;
 
   NATS.start = function(){
-    if(!NATS.paused) return true;
-    NATS.paused  = false;
-    
+    NATS.paused    = false;
     NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
-    NATS.timer = setInterval(NATS.updateElapsedTime, 10);
+    NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
   }
   
   NATS.pause = function(){
@@ -60,7 +58,7 @@
   
   NATS.reset = function(){
     NATS.elapsedTime = 0;
-    NATS.startTime = new Date();
+    NATS.startTime   = new Date();
     NATS.setDirection();
   }
   
