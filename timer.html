@@ -47,12 +47,12 @@
   }
   
   NATS.setDirection = function(){
-    NATS.countUp = document.getElementById("direction").selectedIndex==0;
+    NATS.countUp = NATS.directionEl.selectedIndex==0;
     NATS.redraw();
   }
   
   NATS.toggleDirection = function(){
-    document.getElementById("direction").selectedIndex = (document.getElementById("direction").selectedIndex==0) ? 1 : 0;
+    NATS.directionEl.selectedIndex = (NATS.directionEl.selectedIndex==0) ? 1 : 0;
     NATS.setDirection();
   }
   
@@ -73,7 +73,7 @@
     // Redraw the counter
     var min = Math.floor(NATS.countUp ?  (NATS.elapsedTime / 60000)         : Math.abs(timeLeft/60000));
     var sec = Math.floor(NATS.countUp ? ((NATS.elapsedTime % 60000) / 1000) : Math.abs(timeLeft) % 60000 / 1000);
-    document.getElementById("counter").innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
+    NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
     
     // Update status of the timer
     if (NATS.paused) {
@@ -105,7 +105,9 @@
   
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
-    NATS.body = document.getElementsByTagName("body")[0];
+    NATS.body        = document.getElementsByTagName("body")[0];
+    NATS.directionEl = document.getElementById("direction");
+    NATS.counterDiv  = document.getElementById("counter");
     NATS.reset();
   }
 
@@ -121,7 +123,7 @@ body {
 }
 
 #counter {
-  font-family: monospace;
+  font-family: Bitstream Vera Sans Mono, monospace;
   font-size: 300px;
   font-weight: bold;
   letter-spacing: -30px;
