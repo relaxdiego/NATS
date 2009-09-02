@@ -12,8 +12,8 @@
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
   
-  NATS.talkLength = 5/60;   // Expected length of the talk in minutes
-  NATS.timeToWarn = 3/60;   // Time in minutes when warning signal is displayed
+  NATS.talkLength = 15;   // Expected length of the talk in minutes
+  NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
   
   // EXAMPLE: (assuming count up is true)
   // talkLength of 15 and timeToWarn of 13 means that
@@ -77,12 +77,12 @@
     
     // Update status of the timer
     var c = "";
-    if (NATS.paused){ 
+    if(NATS.paused){ 
       c += "paused "; 
     } else { 
       c += "counting "
-      if (NATS.elapsedTime > (NATS.talkLength * 60000)) c += "overtime ";
-      if (NATS.elapsedTime > (NATS.timeToWarn * 60000)) c += "warning ";
+      if(NATS.elapsedTime > (NATS.timeToWarn * 60000)) c += "warning ";
+      if(NATS.elapsedTime > (NATS.talkLength * 60000)) c += "overtime ";
     }
     NATS.body.setAttribute("class", c);
   }  
