@@ -1,0 +1,30 @@
+= N.A.T.S.
+
+Behold, the Neo-Analytic Time Sequencer!!!1111
+
+It can keep track of your time, wash your dishes, and even walk your dog. NATS is your best friend in this harsh environment we call Earth. A gift from aliens who had nothing better to do than watch paint dry while keeping track of the time. 
+
+OK OK, it's just a simple timer my friends and I built from scratch. Why? Because we're geeks. We also use it keep the speakers for http://www.ideacampdavao.com on their toes. We don't like listening to long talks, you see. :-)
+
+= Installation
+
+1. Download the zip/tarball
+2. Extract the zip/tarball
+3. Go inside the extracted directory
+4. Double-click on timer.html
+5. If the above didn't open in Firefox, repeat step 4!!!! We don't like IE.
+6. Revel in the wonder that is N.A.T.S!!!
+
+= Credits
+
+* Nathaniel 'Nats' B. Jayme (the guy who started it all)
+* Mark 'Relaxdiego' Maglana (the guy who's been OC-ing on this script since then)
+* George 'Mad Guitar Skillz' Tujan (who????)
+
+= Compatibility
+
+This script has only been tested in Firefox 3.5.x.
+
+= License
+
+This script is released under the Creative Commons Attribution 3.0 License. More info at http://creativecommons.org/licenses/by/3.0/
