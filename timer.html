@@ -29,15 +29,40 @@
      GEORGE, OR YOU KNOW WHAT YOU'RE DOING! HEE HEE HEE.
   *******************************************************************/
   
-  NATS.startTime   = null;
+  NATS.countUp     = true;
   NATS.elapsedTime = 0;    // milliseconds elapsed since time start
   NATS.paused      = true;
-  NATS.countUp     = true;
+  NATS.startTime   = null;
+  
+  NATS.initialize = function() {
+    window.removeEventListener("load", NATS.initialize, false);
+    
+    document.addEventListener("keydown", NATS.handleKey, false);
+    document.getElementById("start").addEventListener("click", NATS.start, false);
+    document.getElementById("pause").addEventListener("click", NATS.pause, false);
+    document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
+    document.getElementById("reset").addEventListener("click", NATS.reset, false);
+    
+    NATS.body        = document.getElementsByTagName("body")[0];
+    NATS.directionEl = document.getElementById("direction");
+    NATS.counterDiv  = document.getElementById("counter");
+    NATS.reset();
+  }
 
-  NATS.start = function(){
-    NATS.paused    = false;
-    NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
-    NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
+  NATS.handleKey = function(event){
+    switch(event.keyCode){
+      case 83: if(NATS.paused) NATS.start(); break;                                                // S
+      case 80: if(!NATS.paused && confirm("Are you sure you want to pause?")) NATS.pause(); break; // P
+      case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break;                 // ESC
+      case 68: NATS.toggleDirection(); break;                                                      // D
+    }
+  }
+
+  // Pads a number with leading zeros
+  NATS.pad = function(num, count){
+    var n = Math.abs(num) + '';
+    while(n.length < count) { n = "0" + n }
+    return n;
   }
   
   NATS.pause = function(){
@@ -45,28 +70,7 @@
     NATS.paused = true;
     NATS.redraw();
   }
-  
-  NATS.setDirection = function(){
-    NATS.countUp = NATS.directionEl.selectedIndex==0;
-    NATS.redraw();
-  }
-  
-  NATS.toggleDirection = function(){
-    NATS.directionEl.selectedIndex = (NATS.directionEl.selectedIndex==0) ? 1 : 0;
-    NATS.setDirection();
-  }
-  
-  NATS.reset = function(){
-    NATS.elapsedTime = 0;
-    NATS.startTime   = new Date();
-    NATS.redraw();
-  }
-  
-  NATS.updateElapsedTime = function(){
-    NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime();
-    NATS.redraw();
-  }
-  
+
   NATS.redraw = function(){
     var timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
@@ -85,33 +89,35 @@
     }
     NATS.body.setAttribute("class", c);
   }  
-  
-  // Pads a number with leading zeros
-  NATS.pad = function(num, count){
-    var n = Math.abs(num) + '';
-    while(n.length < count) { n = "0" + n }
-    return n;
-  }
-  
-  NATS.handleKey = function(event){
-    switch(event.keyCode){
-      case 83: if(NATS.paused) NATS.start(); break; // S
-      case 80: if(!NATS.paused && confirm("Are you sure you want to pause?")) NATS.pause(); break; // P
-      case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break; // ESC
-      case 68: NATS.toggleDirection(); break; // D
-    }
-  }
-  
-  NATS.initialize = function() {
-    window.removeEventListener("load", NATS.initialize, false);
-    NATS.body        = document.getElementsByTagName("body")[0];
-    NATS.directionEl = document.getElementById("direction");
-    NATS.counterDiv  = document.getElementById("counter");
-    NATS.reset();
+
+  NATS.reset = function(){
+    NATS.elapsedTime = 0;
+    NATS.startTime   = new Date();
+    NATS.redraw();
   }
 
+  NATS.setDirection = function(){
+    NATS.countUp = NATS.directionEl.selectedIndex==0;
+    NATS.redraw();
+  }
+
+  NATS.start = function(){
+    NATS.paused    = false;
+    NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
+    NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
+  }
+    
+  NATS.toggleDirection = function(){
+    NATS.directionEl.selectedIndex = (NATS.directionEl.selectedIndex==0) ? 1 : 0;
+    NATS.setDirection();
+  }
+  
+  NATS.updateElapsedTime = function(){
+    NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime();
+    NATS.redraw();
+  }
+  
   window.addEventListener("load", NATS.initialize, false);
-  document.addEventListener("keydown", NATS.handleKey, false);
   
 </script>
 
@@ -122,20 +128,39 @@ body {
 }
 
 #counter {
-  font-family: Bitstream Vera Sans Mono, monospace;
-  font-size: 300px;
+  font-family: Courier, monospace;
+  font-size: 350px;
   font-weight: bold;
   letter-spacing: -30px;
-  margin-right: 50px;
+  margin: 60px 50px 0 0;
   text-align: right;
 }
 
-#start, #pause, #reset {
+#start, 
+#pause, 
+#reset {
   height: 50px;
+  position: absolute;
+  top: 5px;
   width: 90px;
 }
 
-#direction { font-size: 15px; }
+#start,
+#pause {
+  left: 5px;
+}
+
+#reset {
+  right: 5px;
+}
+
+#direction { 
+  font-size: 15px;
+  left: 100px;
+  position: absolute;
+  top: 5px;
+}
+
 
 #lights {
   float: right;
@@ -143,12 +168,14 @@ body {
   position: relative;
 }
 
-#counting, #warning, #overtime {
+#counting, 
+#warning, 
+#overtime {
   opacity: 0.05;
 }
 
 body.counting #counting,
-body.warning #warning,
+body.warning  #warning,
 body.overtime #overtime {
   opacity: 1.0;
 }
@@ -156,11 +183,11 @@ body.overtime #overtime {
 #paused { display: none; }
 
 body.paused #paused{
-  letter-spacing: 10px;
   display: block;
-  font-family: monospace;
+  font-family: Courier, monospace;
   font-size: 100px;
   font-weight: bold;
+  letter-spacing: 10px;
   opacity: 1.0;
   position: absolute;
   text-align: center;
@@ -177,18 +204,13 @@ body.counting #start { display: none; }
 
 </head>
 <body>
-   <div style="float:left">
-     <input type="button" id="start" value="Start" onclick="NATS.start();" title="Start timer (S)"/>
-     <input type="button" id="pause" value="Pause" onclick="NATS.pause();" title="Pause timer (P)" />
-     <select id="direction" onchange="NATS.setDirection()" title="Direction (D)">
-       <option>Count up</option>
-       <option>Count down</option>
-     </select>
-   </div>
-   <div style="float:right">
-     <input type="button" id="reset" value="Reset" onclick="NATS.reset();" title="Reset timer (Esc)"/>
-   </div>
-   <p style="clear:both"  />
+   <input type="button" id="start" value="Start" title="Start timer (S)"/>
+   <input type="button" id="pause" value="Pause" title="Pause timer (P)" />
+   <select id="direction" title="Direction (D)">
+     <option>Count up</option>
+     <option>Count down</option>
+   </select>
+   <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
    <div id="counter"> </div>
    <div id="lights">
      <img src="greenLight.png"  id="counting"/>
