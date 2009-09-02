@@ -69,11 +69,10 @@
   
   NATS.redraw = function(){
     var timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
-
+    var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
+    
     // Redraw the counter
-    var min = Math.floor(  NATS.countUp ? (NATS.elapsedTime/60000)      : Math.abs(timeLeft/60000)       );
-    var sec = Math.floor(  NATS.countUp ? (NATS.elapsedTime%60000)/1000 : Math.abs(timeLeft%60000)/1000  );
-    NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(min, 2) + ":" + NATS.pad(sec, 2);
+    NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000), 2) + ":" + NATS.pad(Math.floor((time%60000)/1000), 2);
     
     // Update status of the timer
     var c = "";
