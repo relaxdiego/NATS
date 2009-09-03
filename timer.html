@@ -72,15 +72,10 @@
     NATS.redrawMils(time);
     
     // Update status of the timer
-    var c = "";
-    if(NATS.paused){ 
-      c += "paused "; 
-    } else { 
-      c += "counting ";
-      if(NATS.elapsedTime > NATS.timeToWarn) c += "warning ";
-      if(NATS.elapsedTime > NATS.talkLength) c += "overtime ";
-    }
-    NATS.body.setAttribute("class", c);
+    if      (NATS.paused)                        { NATS.body.setAttribute("class", "paused")   } 
+    else if (NATS.elapsedTime > NATS.talkLength) { NATS.body.setAttribute("class", "overtime") }
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.body.setAttribute("class", "warning")  } 
+    else                                         { NATS.body.setAttribute("class", "counting") }
   }  
   
   NATS.redrawMils = function(time){
