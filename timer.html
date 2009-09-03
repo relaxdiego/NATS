@@ -24,7 +24,7 @@
     document.getElementById("start").addEventListener("click", NATS.start, false);
     document.getElementById("pause").addEventListener("click", NATS.pause, false);
     document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
-    document.getElementById("reset").addEventListener("click", NATS.reset, false);
+    document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
     
     NATS.body        = document.getElementsByTagName("body")[0];
     NATS.directionEl = document.getElementById("direction");
@@ -32,11 +32,16 @@
     NATS.milsDiv     = document.getElementById("milliseconds");
     NATS.reset();
   }
+  
+  NATS.confirmReset = function(){
+    document.getElementById("reset").blur();
+    if(confirm("Are you sure you want to reset?")) NATS.reset();
+  }
 
   NATS.handleKey = function(event){
     switch(event.keyCode){
       case 32: NATS.toggleStartPause(); break;                                        // Spacebar            
-      case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break;    // ESC
+      case 27: NATS.confirmReset(); break;                                            // ESC
       case 68: NATS.toggleDirection(); break;                                         // D
       case 77: NATS.showMilliseconds = !NATS.showMilliseconds; NATS.redraw(); break;  // M
     }
@@ -72,9 +77,9 @@
     NATS.redrawMils(time);
     
     // Update status of the timer
-    if      (NATS.paused)                        { NATS.body.setAttribute("class", "paused")   } 
+    if      (NATS.paused)                        { NATS.body.setAttribute("class", "paused"  ) } 
     else if (NATS.elapsedTime > NATS.talkLength) { NATS.body.setAttribute("class", "overtime") }
-    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.body.setAttribute("class", "warning")  } 
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.body.setAttribute("class", "warning" ) } 
     else                                         { NATS.body.setAttribute("class", "counting") }
   }  
   
@@ -98,7 +103,6 @@
     NATS.elapsedTime = 0;
     NATS.startTime   = new Date();
     NATS.parseTimes();
-    document.getElementById("reset").blur();  // lousy hack. but it helps keep the counter in tact if spacebar is pressed next
     NATS.redraw();
   }
 
@@ -119,10 +123,7 @@
   }
 
   NATS.toggleStartPause = function(){
-    switch(NATS.paused) {
-      case true: NATS.start(); break;
-      default  : NATS.pause(); break;
-    }
+    NATS.paused ? NATS.start() : NATS.pause();
   }
   
   NATS.updateElapsedTime = function(){
@@ -238,8 +239,8 @@ body.counting #start { display: none; }
 
 </head>
 <body>
-   <input type="button" id="start" value="Start" title="Start timer (S)"/>
-   <input type="button" id="pause" value="Pause" title="Pause timer (P)" />
+   <input type="button" id="start" value="Start" title="Start timer (Spacebar)"/>
+   <input type="button" id="pause" value="Pause" title="Pause timer (Spacebar)" />
    <select id="direction" title="Direction (D)">
      <option>Count up</option>
      <option>Count down</option>
