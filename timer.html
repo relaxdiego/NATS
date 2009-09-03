@@ -25,7 +25,7 @@
     document.getElementById("start").addEventListener("click", NATS.start, false);
     document.getElementById("pause").addEventListener("click", NATS.pause, false);
     document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
-    document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
+    document.getElementById("reset").addEventListener("click", function(e) { NATS.confirmReset(); e.stopPropagation() }, false);
     document.getElementById("talkLength").addEventListener("keydown", function(e){ e.stopPropagation() }, false);
     document.getElementById("timeToWarn").addEventListener("keydown", function(e){ e.stopPropagation() }, false);    
     
