@@ -35,11 +35,10 @@
 
   NATS.handleKey = function(event){
     switch(event.keyCode){
-      case 83: if(NATS.paused) NATS.start(); break;                                                // S
-      case 80: if(!NATS.paused && confirm("Are you sure you want to pause?")) NATS.pause(); break; // P
-      case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break;                 // ESC
-      case 68: NATS.toggleDirection(); break;                                                      // D
-      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; NATS.redraw(); break;               // M
+      case 32: NATS.toggleStartPause(); break;                                        // Spacebar            
+      case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break;    // ESC
+      case 68: NATS.toggleDirection(); break;                                         // D
+      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; NATS.redraw(); break;  // M
     }
   }
 
@@ -104,6 +103,7 @@
     NATS.elapsedTime = 0;
     NATS.startTime   = new Date();
     NATS.parseTimes();
+    document.getElementById("reset").blur();  // lousy hack. but it helps keep the counter in tact if spacebar is pressed next
     NATS.redraw();
   }
 
@@ -121,6 +121,13 @@
   NATS.toggleDirection = function(){
     NATS.directionEl.selectedIndex = (NATS.directionEl.selectedIndex==0) ? 1 : 0;
     NATS.setDirection();
+  }
+
+  NATS.toggleStartPause = function(){
+    switch(NATS.paused) {
+      case true: NATS.start(); break;
+      default  : NATS.pause(); break;
+    }
   }
   
   NATS.updateElapsedTime = function(){
