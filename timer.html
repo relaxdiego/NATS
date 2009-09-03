@@ -78,7 +78,7 @@
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
     
     // Redraw the counter
-    NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000));
+    NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000)); // concatenation is consistently faster than Array.join() in this case
     NATS.redrawMils(time);
     
     // Update status of the timer
@@ -93,10 +93,10 @@
     if(NATS.showMilliseconds){
       mils = (time % 60000) % 1000;
       
-      if      (mils ==  0) { mils = '.000'       } 
-      else if (mils <  10) { mils = '.00' + mils } 
-      else if (mils < 100) { mils = '.0'  + mils }
-      else                 { mils = '.'   + mils }
+      if      (mils ==  0) { mils =  '.000'                 } 
+      else if (mils <  10) { mils = ['.00' , mils].join('') } // Array.join() seems to be faster than string concat in this case
+      else if (mils < 100) { mils = ['.0'  , mils].join('') }
+      else                 { mils = ['.'   , mils].join('') }
 
     } else {
       mils = '';
