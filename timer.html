@@ -20,16 +20,19 @@
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
     
+    // attach event handlers
     document.addEventListener("keydown", NATS.handleKey, false);
     document.getElementById("start").addEventListener("click", NATS.start, false);
     document.getElementById("pause").addEventListener("click", NATS.pause, false);
     document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
     document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
     
-    NATS.body        = document.getElementsByTagName("body")[0];
-    NATS.directionEl = document.getElementById("direction");
-    NATS.counterDiv  = document.getElementById("counter");
-    NATS.milsDiv     = document.getElementById("milliseconds");
+    // Remember HTML elements to avoid re-traversing DOM
+    NATS.htmlBody         = document.getElementsByTagName("body")[0];
+    NATS.htmlDirection    = document.getElementById("direction");
+    NATS.htmlCounter      = document.getElementById("counter");
+    NATS.htmlMilliseconds = document.getElementById("milliseconds");
+    
     NATS.reset();
   }
   
@@ -73,14 +76,14 @@
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
     
     // Redraw the counter
-    NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000));
+    NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000));
     NATS.redrawMils(time);
     
     // Update status of the timer
-    if      (NATS.paused)                        { NATS.body.setAttribute("class", "paused"  ) } 
-    else if (NATS.elapsedTime > NATS.talkLength) { NATS.body.setAttribute("class", "overtime") }
-    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.body.setAttribute("class", "warning" ) } 
-    else                                         { NATS.body.setAttribute("class", "counting") }
+    if      (NATS.paused)                        { NATS.htmlBody.setAttribute("class", "paused"  ) } 
+    else if (NATS.elapsedTime > NATS.talkLength) { NATS.htmlBody.setAttribute("class", "overtime") }
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.htmlBody.setAttribute("class", "warning" ) } 
+    else                                         { NATS.htmlBody.setAttribute("class", "counting") }
   }  
   
   NATS.redrawMils = function(time){
@@ -96,7 +99,7 @@
     } else {
       mils = '';
     }
-    NATS.milsDiv.innerHTML = mils;
+    NATS.htmlMilliseconds.innerHTML = mils;
   }
 
   NATS.reset = function(){
@@ -107,18 +110,18 @@
   }
 
   NATS.setDirection = function(){
-    NATS.countUp = NATS.directionEl.selectedIndex==0;
+    NATS.countUp = NATS.htmlDirection.selectedIndex==0;
     NATS.redraw();
   }
 
   NATS.start = function(){
     NATS.paused    = false;
     NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
-    NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
+    NATS.timer     = setInterval(NATS.updateElapsedTime, 5);
   }
     
   NATS.toggleDirection = function(){
-    NATS.directionEl.selectedIndex = (NATS.directionEl.selectedIndex==0) ? 1 : 0;
+    NATS.htmlDirection.selectedIndex = (NATS.htmlDirection.selectedIndex==0) ? 1 : 0;
     NATS.setDirection();
   }
 
@@ -145,10 +148,14 @@ body {
 #time {
   display: block;
   font-family: Courier, monospace;
-  font-size: 300px;
+  font-size: 340px;
   font-weight: bold;
-  margin: 60px 50px 0 0;
+  overflow: hidden;
+  padding: 15px;
+  position: absolute;
+  right: 20px;
   text-align: right;
+  top: 50px;
 }
 
 #counter { letter-spacing: -30px; }
@@ -177,8 +184,6 @@ body {
   top: 5px;
 }
 
-
-
 #talkLengthContainer,
 #timeToWarnContainer {
   position: absolute;
@@ -199,8 +204,9 @@ body {
 
 #lights {
   float: right;
-  margin-right: 50px;
+  margin-right: 10px;
   position: relative;
+  top: 400px;
 }
 
 #counting, 
@@ -239,15 +245,17 @@ body.counting #start { display: none; }
 
 </head>
 <body>
-   <input type="button" id="start" value="Start" title="Start timer (Spacebar)"/>
-   <input type="button" id="pause" value="Pause" title="Pause timer (Spacebar)" />
-   <select id="direction" title="Direction (D)">
-     <option>Count up</option>
-     <option>Count down</option>
-   </select>
-   <div id="talkLengthContainer">max <input id="talkLength" value="15:00" title="Talk length in mm:ss format"/></div>
-   <div id="timeToWarnContainer">warn <input id="timeToWarn" value="13:00" title="Time to warn in mm:ss format"/></div>
-   <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
+   <div id="toolbar">
+     <input type="button" id="start" value="Start" title="Start timer (Spacebar)"/>
+     <input type="button" id="pause" value="Pause" title="Pause timer (Spacebar)" />
+     <select id="direction" title="Direction (D)">
+       <option>Count up</option>
+       <option>Count down</option>
+     </select>
+     <div id="talkLengthContainer">max <input id="talkLength" value="15:00" title="Talk length in mm:ss format"/></div>
+     <div id="timeToWarnContainer">warn <input id="timeToWarn" value="13:00" title="Time to warn in mm:ss format"/></div>
+     <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
+   </div>
    <div id="time">
      <span id="counter"> </span><span id="milliseconds"> </span>
    </div>
