@@ -9,28 +9,13 @@
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
   
-  NATS.talkLength       = 15;   // Expected length of the talk in minutes
-  NATS.timeToWarn       = 13;   // Time in minutes when warning signal is displayed
-  
-  // EXAMPLE: (assuming count up is true)
-  // talkLength of 15 and timeToWarn of 13 means that
-  // the warning signal will be shown at 13:00 and the overtime 
-  // signal will be shown at 15:00. If you want to specify any of
-  // the two values in seconds instead, just say x/60 where x is
-  // the time in seconds. For instance, a timeToWarn of 5/60 means
-  // the warning signal will be displayed at 00:05
-  
-  /*******************************************************************
-     WARNING NI DODONG:
-     DO NOT CHANGE ANYTHING BELOW UNLESS YOU ARE NATSKY, MARK, 
-     GEORGE, OR YOU KNOW WHAT YOU'RE DOING! HEE HEE HEE.
-  *******************************************************************/
-  
-  NATS.countUp     = true;
-  NATS.elapsedTime = 0;         // milliseconds elapsed since time start
-  NATS.paused      = true;
-  NATS.startTime   = null;
-  NATS.showMilliseconds = false; // Ooooooh, what does this button do?
+  NATS.talkLength       = 15 * 60000;   // Expected length of the talk in milliseconds
+  NATS.timeToWarn       = 13 * 60000;   // Time in milliseconds when warning signal is displayed
+  NATS.countUp          = true;
+  NATS.elapsedTime      = 0;            // milliseconds elapsed since time start
+  NATS.paused           = true;
+  NATS.startTime        = null;
+  NATS.showMilliseconds = false;        // Ooooooh, what does this button do?
     
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
@@ -70,7 +55,7 @@
   }
 
   NATS.redraw = function(){
-    var timeLeft = NATS.talkLength * 60000 - NATS.elapsedTime;
+    var timeLeft = NATS.talkLength - NATS.elapsedTime;
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
     
     // Redraw the counter
@@ -83,8 +68,8 @@
       c += "paused "; 
     } else { 
       c += "counting ";
-      if(NATS.elapsedTime > (NATS.timeToWarn * 60000)) c += "warning ";
-      if(NATS.elapsedTime > (NATS.talkLength * 60000)) c += "overtime ";
+      if(NATS.elapsedTime > NATS.timeToWarn) c += "warning ";
+      if(NATS.elapsedTime > NATS.talkLength) c += "overtime ";
     }
     NATS.body.setAttribute("class", c);
   }  
