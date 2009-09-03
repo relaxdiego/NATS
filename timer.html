@@ -26,6 +26,8 @@
     document.getElementById("pause").addEventListener("click", NATS.pause, false);
     document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
     document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
+    document.getElementById("talkLength").addEventListener("keydown", function(e){ e.stopPropagation() }, false);
+    document.getElementById("timeToWarn").addEventListener("keydown", function(e){ e.stopPropagation() }, false);    
     
     // Remember HTML elements to avoid re-traversing DOM
     NATS.htmlBody         = document.getElementsByTagName("body")[0];
