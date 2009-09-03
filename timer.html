@@ -9,13 +9,13 @@
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
   
-  NATS.talkLength       = 15 * 60000;   // Expected length of the talk in milliseconds
-  NATS.timeToWarn       = 13 * 60000;   // Time in milliseconds when warning signal is displayed
+  NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
+  NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
   NATS.countUp          = true;
-  NATS.elapsedTime      = 0;            // milliseconds elapsed since time start
+  NATS.elapsedTime      = 0;      // milliseconds elapsed since time start
   NATS.paused           = true;
   NATS.startTime        = null;
-  NATS.showMilliseconds = false;        // Ooooooh, what does this button do?
+  NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
     
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
@@ -46,6 +46,16 @@
   NATS.pad = function(num){
     if(num < 10) return '0' + num;
     return num;
+  }
+  
+  NATS.parseTimes = function(){
+    var v = document.getElementById("talkLength").value.split(":");
+    if(v.length==1){ NATS.talkLength = v[0] * 1000;                } 
+    else           { NATS.talkLength = v[0] * 60000 + v[1] * 1000; }
+    
+    v = document.getElementById("timeToWarn").value.split(":");
+    if(v.length==1){ NATS.timeToWarn = v[0] * 1000;                } 
+    else           { NATS.timeToWarn = v[0] * 60000 + v[1] * 1000; }
   }
   
   NATS.pause = function(){
@@ -93,6 +103,7 @@
   NATS.reset = function(){
     NATS.elapsedTime = 0;
     NATS.startTime   = new Date();
+    NATS.parseTimes();
     NATS.redraw();
   }
 
@@ -125,6 +136,7 @@
 body {
   background-color: #000;
   color: #fff;
+  font-family: sans-serif;
 }
 
 #time {
@@ -142,7 +154,6 @@ body {
 #start, 
 #pause, 
 #reset {
-  height: 50px;
   position: absolute;
   top: 5px;
   width: 90px;
@@ -158,12 +169,30 @@ body {
 }
 
 #direction { 
-  font-size: 15px;
   left: 100px;
   position: absolute;
   top: 5px;
 }
 
+
+
+#talkLengthContainer,
+#timeToWarnContainer {
+  position: absolute;
+  right: 200px;
+  text-align: right;
+  top: 5px;
+  width: 100px;
+}
+
+#talkLength,
+#timeToWarn {
+  height: 20px;
+  text-align: right;
+  width: 45px;
+}
+
+#timeToWarnContainer { right: 100px; }
 
 #lights {
   float: right;
@@ -213,6 +242,8 @@ body.counting #start { display: none; }
      <option>Count up</option>
      <option>Count down</option>
    </select>
+   <div id="talkLengthContainer">max <input id="talkLength" value="15:00" title="Talk length in mm:ss format"/></div>
+   <div id="timeToWarnContainer">warn <input id="timeToWarn" value="13:00" title="Time to warn in mm:ss format"/></div>
    <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
    <div id="time">
      <span id="counter"> </span><span id="milliseconds"> </span>
