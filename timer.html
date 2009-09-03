@@ -9,8 +9,8 @@
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
   
-  NATS.talkLength = 15;   // Expected length of the talk in minutes
-  NATS.timeToWarn = 13;   // Time in minutes when warning signal is displayed
+  NATS.talkLength       = 15;   // Expected length of the talk in minutes
+  NATS.timeToWarn       = 13;   // Time in minutes when warning signal is displayed
   
   // EXAMPLE: (assuming count up is true)
   // talkLength of 15 and timeToWarn of 13 means that
@@ -27,10 +27,11 @@
   *******************************************************************/
   
   NATS.countUp     = true;
-  NATS.elapsedTime = 0;    // milliseconds elapsed since time start
+  NATS.elapsedTime = 0;         // milliseconds elapsed since time start
   NATS.paused      = true;
   NATS.startTime   = null;
-  
+  NATS.showMilliseconds = true; // Ooooooh, what does this button do?
+    
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
     
@@ -43,6 +44,7 @@
     NATS.body        = document.getElementsByTagName("body")[0];
     NATS.directionEl = document.getElementById("direction");
     NATS.counterDiv  = document.getElementById("counter");
+    NATS.milsDiv     = document.getElementById("milliseconds");
     NATS.reset();
   }
 
@@ -52,14 +54,13 @@
       case 80: if(!NATS.paused && confirm("Are you sure you want to pause?")) NATS.pause(); break; // P
       case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break;                 // ESC
       case 68: NATS.toggleDirection(); break;                                                      // D
+      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; break;                              // M
     }
   }
 
-  // Pads a number with leading zeros
-  NATS.pad = function(num, count){
-    var n = Math.abs(num) + '';
-    while(n.length < count) { n = "0" + n }
-    return n;
+  NATS.pad = function(num){
+    if(num < 10) return '0' + num;
+    return num;
   }
   
   NATS.pause = function(){
@@ -73,7 +74,8 @@
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
     
     // Redraw the counter
-    NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000), 2) + ":" + NATS.pad(Math.floor((time%60000)/1000), 2);
+    NATS.counterDiv.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000));
+    NATS.redrawMils(time);
     
     // Update status of the timer
     var c = "";
@@ -86,6 +88,22 @@
     }
     NATS.body.setAttribute("class", c);
   }  
+  
+  NATS.redrawMils = function(time){
+    var mils = 0;
+    if(NATS.showMilliseconds){
+      mils = (time % 60000) % 1000;
+      
+      if      (mils ==  0) { mils = '.000'       } 
+      else if (mils <  10) { mils = '.00' + mils } 
+      else if (mils < 100) { mils = '.0'  + mils }
+      else                 { mils = '.'   + mils }
+
+    } else {
+      mils = '';
+    }
+    NATS.milsDiv.innerHTML = mils;
+  }
 
   NATS.reset = function(){
     NATS.elapsedTime = 0;
@@ -124,14 +142,17 @@ body {
   color: #fff;
 }
 
-#counter {
+#time {
+  display: block;
   font-family: Courier, monospace;
-  font-size: 350px;
+  font-size: 300px;
   font-weight: bold;
-  letter-spacing: -30px;
   margin: 60px 50px 0 0;
   text-align: right;
 }
+
+#counter { letter-spacing: -30px; }
+#milliseconds { font-size: 50px; }
 
 #start, 
 #pause, 
@@ -208,7 +229,9 @@ body.counting #start { display: none; }
      <option>Count down</option>
    </select>
    <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
-   <div id="counter"> </div>
+   <div id="time">
+     <span id="counter"> </span><span id="milliseconds"> </span>
+   </div>
    <div id="lights">
      <img src="greenLight.png"  id="counting"/>
      <img src="yellowLight.png" id="warning"/>
