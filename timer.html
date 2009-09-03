@@ -54,7 +54,7 @@
       case 80: if(!NATS.paused && confirm("Are you sure you want to pause?")) NATS.pause(); break; // P
       case 27: if(confirm("Are you sure you want to reset?")) NATS.reset(); break;                 // ESC
       case 68: NATS.toggleDirection(); break;                                                      // D
-      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; break;                              // M
+      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; NATS.redraw(); break;               // M
     }
   }
 
