@@ -2,7 +2,7 @@
 <head>
 <script type="text/javascript">
   //
-  // N.A.T.S. = Neo-Analytic Time Sequencer!
+  // N.A.T.S. = Neo-Analytic Time Sequencer!!!!1111
   // Licensed under the Creative Commons Attribution 3.0 License
   // See README.rdoc for more information
   //
@@ -11,10 +11,10 @@
   
   NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
   NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
-  NATS.countUp          = true;
-  NATS.elapsedTime      = 0;      // milliseconds elapsed since time start
-  NATS.paused           = true;
-  NATS.startTime        = null;
+  NATS.countUp          = true;   // Count up or down?
+  NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
+  NATS.paused           = true;   // Destroy planet Earth or not?
+  NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
     
   NATS.initialize = function() {
@@ -54,8 +54,8 @@
   }
 
   NATS.pad = function(num){
-    if(num < 10) return '0' + num;
-    return num;
+    if(num < 10){ return ['0', num].join('') } 
+    else        { return num                 }
   }
   
   NATS.parseTimes = function(){
@@ -80,7 +80,7 @@
     
     // Redraw the counter
     NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000)); // concatenation is consistently faster than Array.join() in this case
-    NATS.redrawMils(time);
+    NATS.redrawMils(time);  
     
     // Update status of the timer
     if      (NATS.paused)                        { NATS.htmlBody.setAttribute("class", "paused"  ) } 
@@ -92,17 +92,17 @@
   NATS.redrawMils = function(time){
     var mils = 0;
     if(NATS.showMilliseconds){
-      mils = (time % 60000) % 1000;
-      
+      mils = time % 1000;
       if      (mils ==  0) { mils =  '.000'                 } 
       else if (mils <  10) { mils = ['.00' , mils].join('') } // Array.join() seems to be faster than string concat in this case
       else if (mils < 100) { mils = ['.0'  , mils].join('') }
       else                 { mils = ['.'   , mils].join('') }
-
-    } else {
-      mils = '';
-    }
-    NATS.htmlMilliseconds.innerHTML = mils;
+      NATS.htmlMilliseconds.innerHTML = mils;
+      NATS.millisecondsCleared        = false;
+    } else if (!NATS.showMilliseconds && !NATS.millisecondsCleared){
+      NATS.htmlMilliseconds.innerHTML = '';  
+      NATS.millisecondsCleared        = true;
+    }     
   }
 
   NATS.reset = function(){
@@ -120,7 +120,7 @@
   NATS.start = function(){
     NATS.paused    = false;
     NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
-    NATS.timer     = setInterval(NATS.updateElapsedTime, 5);
+    NATS.timer     = setInterval(NATS.updateElapsedTime, 20);
   }
     
   NATS.toggleDirection = function(){
