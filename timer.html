@@ -120,7 +120,7 @@
   NATS.start = function(){
     NATS.paused    = false;
     NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
-    NATS.timer     = setInterval(NATS.updateElapsedTime, 20);
+    NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
   }
     
   NATS.toggleDirection = function(){
