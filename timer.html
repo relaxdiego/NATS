@@ -16,6 +16,7 @@
   NATS.paused           = true;   // Destroy planet Earth or not?
   NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
+  NATS.analog           = false;  // Oooooooooooh
     
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
@@ -35,6 +36,8 @@
     NATS.htmlDirection    = document.getElementById("direction");
     NATS.htmlCounter      = document.getElementById("counter");
     NATS.htmlMilliseconds = document.getElementById("milliseconds");
+    NATS.htmlSecondHand   = document.getElementById("secondHand");
+    NATS.htmlMinuteHand   = document.getElementById("minuteHand");
     
     NATS.reset();
   }
@@ -46,6 +49,7 @@
 
   NATS.handleKey = function(event){
     switch(event.keyCode){
+      case 65: NATS.toggleAnalog(); break;                                            // A
       case 32: NATS.toggleStartPause(); break;                                        // Spacebar            
       case 27: NATS.confirmReset(); break;                                            // ESC
       case 68: NATS.toggleDirection(); break;                                         // D
@@ -79,8 +83,19 @@
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
     
     // Redraw the counter
-    NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(Math.floor(time/60000)) + ":" + NATS.pad(Math.floor((time%60000)/1000)); // concatenation is consistently faster than Array.join() in this case
-    NATS.redrawMils(time);  
+    var minutes = Math.floor(time/60000);
+    var seconds = Math.floor((time%60000)/1000);
+    
+    if(NATS.analog){
+      if(seconds!=NATS._previousSecond){
+        NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)";
+        NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)";
+        NATS._previousSecond = seconds;
+      }
+    } else { 
+      NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(minutes) + ":" + NATS.pad(seconds); // concatenation is consistently faster than Array.join() in this case
+      NATS.redrawMils(time);  
+    }  
     
     // Update status of the timer
     if      (NATS.paused)                        { NATS.htmlBody.setAttribute("class", "paused"  ) } 
@@ -122,6 +137,12 @@
     NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
     NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
   }
+  
+  NATS.toggleAnalog = function(){
+    NATS.analog = !NATS.analog;
+    if(NATS.analog) { document.getElementById("time").setAttribute("class", "analog") ; NATS.redraw(); }
+    else            { document.getElementById("time").setAttribute("class", "digital");                }
+  }
     
   NATS.toggleDirection = function(){
     NATS.htmlDirection.selectedIndex = (NATS.htmlDirection.selectedIndex==0) ? 1 : 0;
@@ -153,12 +174,14 @@ body {
   font-family: Courier, monospace;
   font-size: 340px;
   font-weight: bold;
+  height: 300px;
   overflow: hidden;
   padding: 15px;
   position: absolute;
   right: 20px;
   text-align: right;
   top: 50px;
+  width: 100%;
 }
 
 #counter { letter-spacing: -30px; }
@@ -244,6 +267,26 @@ body.paused #paused{
 body.counting #pause { display: inline; }
 body.counting #start { display: none; }
 
+#minuteHand,
+#secondHand { 
+  display: none;
+}
+
+#time.analog #minuteHand,
+#time.analog #secondHand {
+  display: block;
+  font-family: Courier, monospace;
+  font-size: 30px;
+  right: 100px;
+  position: absolute;
+  top: 150px;
+}
+
+#time.analog #counter,
+#time.analog #milliseconds {
+  display: none;
+}
+
 </style>
 
 </head>
@@ -261,6 +304,8 @@ body.counting #start { display: none; }
    </div>
    <div id="time">
      <span id="counter"> </span><span id="milliseconds"> </span>
+     <div id="minuteHand">=======&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+     <div id="secondHand">-------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
    </div>
    <div id="lights">
      <img src="greenLight.png"  id="counting"/>
