@@ -90,6 +90,8 @@
       if(seconds!=NATS._previousSecond){
         NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)";
         NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)";
+        NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)";
+        NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)";
         NATS._previousSecond = seconds;
       }
     } else { 
