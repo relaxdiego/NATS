@@ -110,17 +110,17 @@
 
     if(seconds!=NATS._previousSecond){
       NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
-      setTimeout(function(){ NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 30);
+      setTimeout(function(){ NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 50);
       NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
-      setTimeout(function(){ NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 30);
+      setTimeout(function(){ NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 50);
       NATS._previousSecond = seconds;
     }
 
     if(minutes!=NATS._previousMinute){
       setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
-      setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 430);
+      setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 450);
       setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
-      setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 430);
+      setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 450);
       NATS._previousMinute = minutes;
     }
   }
