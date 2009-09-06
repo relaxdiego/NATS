@@ -17,6 +17,7 @@
   NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
   NATS.analog           = false;  // Oooooooooooh
+  NATS._previousSecond  = 0;
     
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
@@ -87,13 +88,7 @@
     var seconds = Math.floor((time%60000)/1000);
     
     if(NATS.analog){
-      if(seconds!=NATS._previousSecond){
-        NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)";
-        NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)";
-        NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)";
-        NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)";
-        NATS._previousSecond = seconds;
-      }
+      NATS.redrawAnalog(minutes, seconds, !NATS.countUp && timeLeft < 0);
     } else { 
       NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(minutes) + ":" + NATS.pad(seconds); // concatenation is consistently faster than Array.join() in this case
       NATS.redrawMils(time);  
@@ -106,6 +101,30 @@
     else                                         { NATS.htmlBody.setAttribute("class", "counting") }
   }  
   
+  NATS.redrawAnalog = function(minutes, seconds, negative){
+    var offset = (seconds > NATS._previousSecond && !negative) ? 1 : -1
+    if(negative){
+      minutes = minutes * -1;
+      seconds = seconds * -1;
+    }
+
+    if(seconds!=NATS._previousSecond){
+      NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
+      setTimeout(function(){ NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 30);
+      NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
+      setTimeout(function(){ NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 30);
+      NATS._previousSecond = seconds;
+    }
+
+    if(minutes!=NATS._previousMinute){
+      setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
+      setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 430);
+      setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
+      setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 430);
+      NATS._previousMinute = minutes;
+    }
+  }
+
   NATS.redrawMils = function(time){
     var mils = 0;
     if(NATS.showMilliseconds){
@@ -274,14 +293,21 @@ body.counting #start { display: none; }
   display: none;
 }
 
+#time.analog {
+  height: 400px;
+}
+
 #time.analog #minuteHand,
 #time.analog #secondHand {
   display: block;
   font-family: Courier, monospace;
   font-size: 30px;
-  right: 100px;
+  left: 200px;
   position: absolute;
-  top: 150px;
+  top: 175px;
+  width: 350px;
+  -moz-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
 }
 
 #time.analog #counter,
@@ -306,8 +332,8 @@ body.counting #start { display: none; }
    </div>
    <div id="time">
      <span id="counter"> </span><span id="milliseconds"> </span>
-     <div id="minuteHand">=======&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-     <div id="secondHand">-------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+     <img src="minuteHand.png" id="minuteHand" />
+     <img src="secondHand.png" id="secondHand" />
    </div>
    <div id="lights">
      <img src="greenLight.png"  id="counting"/>
