@@ -8,17 +8,21 @@
   //
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
-  
-  NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
-  NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
+
+  NATS.analog           = false;  // Oooooooooooh  
   NATS.countUp          = true;   // Count up or down?
   NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
+  NATS.milliseconds     = 0;
+  NATS.minutes          = 0;
+  NATS.negative         = false;
   NATS.paused           = true;   // Destroy planet Earth or not?
-  NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
+  NATS.previousMinute   = 0;
+  NATS.previousSecond   = 0;
+  NATS.seconds          = 0;
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
-  NATS.analog           = false;  // Oooooooooooh
-  
-  NATS._previousSecond  = 0;
+  NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
+  NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
+  NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
     
   NATS.initialize = function() {
     window.removeEventListener("load", NATS.initialize, false);
@@ -102,26 +106,26 @@
   }  
   
   NATS.redrawAnalog = function(minutes, seconds, negative){
-    var offset = (seconds > NATS._previousSecond && !negative) ? 1 : -1
+    var offset = (NATS.countUp && !negative) ? 1 : -1
     if(negative){
       minutes = minutes * -1;
       seconds = seconds * -1;
     }
 
-    if(seconds!=NATS._previousSecond){
+    if(seconds!=NATS.previousSecond){
       NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
       setTimeout(function(){ NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 50);
       NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
       setTimeout(function(){ NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 50);
-      NATS._previousSecond = seconds;
+      NATS.previousSecond = seconds;
     }
 
-    if(minutes!=NATS._previousMinute){
+    if(minutes!=NATS.previousMinute){
       setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
       setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 450);
       setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
       setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 450);
-      NATS._previousMinute = minutes;
+      NATS.previousMinute = minutes;
     }
   }
   
