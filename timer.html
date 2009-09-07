@@ -9,6 +9,9 @@
   
   var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
 
+  // It's good to declare these variables here even if I
+  // really don't have to so that I won't end up overwriting
+  // them unwittingly in two or more functions.
   NATS.analog           = false;  // Oooooooooooh  
   NATS.countUp          = true;   // Count up or down?
   NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
@@ -22,6 +25,8 @@
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
   NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
   NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
+  NATS.time             = 0;
+  NATS.timeLeft         = 0;
   NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
     
   NATS.initialize = function() {
@@ -85,17 +90,16 @@
   }
 
   NATS.redraw = function(){
-    var timeLeft = NATS.talkLength - NATS.elapsedTime;
-    var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
-    
     // Compute the timer's components
-    NATS.negative     = !NATS.countUp && timeLeft < 0;
-    NATS.minutes      = Math.floor(time/60000);
-    NATS.seconds      = Math.floor((time%60000)/1000);
-    NATS.milliseconds = time % 1000;
+    NATS.timeLeft     = NATS.talkLength - NATS.elapsedTime;
+    NATS.time         = NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
+    NATS.negative     = !NATS.countUp && NATS.timeLeft < 0;
+    NATS.minutes      = Math.floor(NATS.time/60000);
+    NATS.seconds      = Math.floor((NATS.time%60000)/1000);
+    NATS.milliseconds = NATS.time % 1000;
 
     // Redraw the counter    
-    if(NATS.analog){ NATS.redrawAnalog(NATS.minutes, NATS.seconds, NATS.negative);  } 
+    if(NATS.analog){ NATS.redrawAnalog(NATS.minutes, NATS.seconds, NATS.negative);                     }
     else           { NATS.redrawDigital(NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative); }  
     
     // Update status of the timer
