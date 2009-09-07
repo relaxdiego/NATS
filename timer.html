@@ -17,6 +17,7 @@
   NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
   NATS.analog           = false;  // Oooooooooooh
+  
   NATS._previousSecond  = 0;
     
   NATS.initialize = function() {
@@ -83,16 +84,15 @@
     var timeLeft = NATS.talkLength - NATS.elapsedTime;
     var time     = NATS.countUp ? NATS.elapsedTime : Math.abs(timeLeft); 
     
-    // Redraw the counter
-    var minutes = Math.floor(time/60000);
-    var seconds = Math.floor((time%60000)/1000);
-    
-    if(NATS.analog){
-      NATS.redrawAnalog(minutes, seconds, !NATS.countUp && timeLeft < 0);
-    } else { 
-      NATS.htmlCounter.innerHTML = (!NATS.countUp && timeLeft < 0 ? "-" : "") + NATS.pad(minutes) + ":" + NATS.pad(seconds); // concatenation is consistently faster than Array.join() in this case
-      NATS.redrawMils(time);  
-    }  
+    // Compute the timer's components
+    NATS.negative     = !NATS.countUp && timeLeft < 0;
+    NATS.minutes      = Math.floor(time/60000);
+    NATS.seconds      = Math.floor((time%60000)/1000);
+    NATS.milliseconds = time % 1000;
+
+    // Redraw the counter    
+    if(NATS.analog){ NATS.redrawAnalog(NATS.minutes, NATS.seconds, NATS.negative);  } 
+    else           { NATS.redrawDigital(NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative); }  
     
     // Update status of the timer
     if      (NATS.paused)                        { NATS.htmlBody.setAttribute("class", "paused"  ) } 
@@ -124,11 +124,14 @@
       NATS._previousMinute = minutes;
     }
   }
+  
+  NATS.redrawDigital = function(minutes, seconds, milliseconds, negative){
+    NATS.htmlCounter.innerHTML = (negative ? "-" : "") + NATS.pad(minutes) + ":" + NATS.pad(seconds); // concatenation is consistently faster than Array.join() in this case
+    NATS.redrawMils(milliseconds);
+  }
 
-  NATS.redrawMils = function(time){
-    var mils = 0;
+  NATS.redrawMils = function(mils){
     if(NATS.showMilliseconds){
-      mils = time % 1000;
       if      (mils ==  0) { mils =  '.000'                 } 
       else if (mils <  10) { mils = ['.00' , mils].join('') } // Array.join() seems to be faster than string concat in this case
       else if (mils < 100) { mils = ['.0'  , mils].join('') }
