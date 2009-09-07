@@ -15,18 +15,18 @@
   NATS.analog           = false;  // Oooooooooooh  
   NATS.countUp          = true;   // Count up or down?
   NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
-  NATS.milliseconds     = 0;
-  NATS.minutes          = 0;
-  NATS.negative         = false;
+  NATS.milliseconds     = 0;      // See NATS.redraw()
+  NATS.minutes          = 0;      // See NATS.redraw()
+  NATS.negative         = false;  // See NATS.redraw()
   NATS.paused           = true;   // Destroy planet Earth or not?
-  NATS.previousMinute   = 0;
-  NATS.previousSecond   = 0;
-  NATS.seconds          = 0;
+  NATS.previousMinute   = 0;      // See NATS.redrawAnalog()
+  NATS.previousSecond   = 0;      // See NATS.redrawAnalog()
+  NATS.seconds          = 0;      // See NATS.redraw()
   NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
   NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
   NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
-  NATS.time             = 0;
-  NATS.timeLeft         = 0;
+  NATS.time             = 0;      // See NATS.redraw()
+  NATS.timeLeft         = 0;      // See NATS.redraw()
   NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
     
   NATS.initialize = function() {
