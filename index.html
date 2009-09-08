@@ -64,10 +64,10 @@
 
   NATS.handleKey = function(event){
     switch(event.keyCode){
-      case 65: NATS.toggleAnalog(); break;                                            // A
-      case 32: NATS.toggleStartPause(); break;                                        // Spacebar            
-      case 27: NATS.confirmReset(); break;                                            // ESC
-      case 68: NATS.toggleDirection(); break;                                         // D
+      case 65: NATS.toggleAnalog(); break;        // A
+      case 32: NATS.toggleStartPause(); break;    // Spacebar
+      case 27: NATS.confirmReset(); break;        // ESC
+      case 68: NATS.toggleDirection(); break;     // D
       case 77: NATS.toggleMilliseconds(); break;  // M
     }
   }
@@ -116,12 +116,14 @@
   // This pieceo of code was obtained from https://developer.mozilla.org/en/Canvas_tutorial/Basic_animations
   // under the MIT license as specified in this page https://developer.mozilla.org/Project:Copyrights
   NATS.redrawAnalog = function(hours, minutes, seconds, milliseconds, negative){
+    // This adds the springy-ness to the second hand
     var offset = 0;
-    if      (Math.floor(NATS.elapsedTime/1000)==0) { offset = 0                }
-    else if (NATS.countUp && milliseconds < 30   ) { offset = Math.PI/60       }
-    else if (!NATS.countUp && milliseconds > 970 ) { offset = -1 * Math.PI/60  }
-    else if (negative && milliseconds < 30       ) { offset = -1 * Math.PI/60  }
-    else                                           { offset = 0                }
+    if      (NATS.paused ||
+             (NATS.timeLeft > -1000 && NATS.timeLeft < 0))  { offset = 0                }
+    else if (NATS.countUp && milliseconds < 30   )          { offset = Math.PI/60       }
+    else if ((!NATS.countUp && milliseconds > 970) ||
+             (negative && milliseconds < 30)         )      { offset = -1 * Math.PI/60  }
+    else                                                    { offset = 0                }
 
     if(negative){
       hours   = hours   * -1;
