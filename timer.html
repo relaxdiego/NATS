@@ -15,7 +15,7 @@
   NATS.analog           = false;  // Oooooooooooh  
   NATS.countUp          = true;   // Count up or down?
   NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
-  NATs.hours            = 0;      // See NATS.redraw()
+  NATS.hours            = 0;      // See NATS.redraw()
   NATS.milliseconds     = 0;      // See NATS.redraw()
   NATS.minutes          = 0;      // See NATS.redraw()
   NATS.negative         = false;  // See NATS.redraw()
@@ -97,7 +97,7 @@
     NATS.time         = NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
     NATS.negative     = !NATS.countUp && NATS.timeLeft < 0;
     NATS.hours        = Math.floor(NATS.time/60000/60);
-    NATS.minutes      = Math.floor(NATS.time/60000%60);
+    NATS.minutes      = Math.floor(NATS.time/60000);
     NATS.seconds      = Math.floor((NATS.time%60000)/1000);
     NATS.milliseconds = NATS.time % 1000;
 
