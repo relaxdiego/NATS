@@ -31,6 +31,10 @@ This script has only been tested on the ff platforms
 
 (Should play well with Webkit also but we're not sure. Definitely. Maybe. Hey isn't that a song???) 
 
+= Support
+
+Having a hard time using this highly advanced, absolutely awesome app? Join us on IRC at #nats-timer (freenode) or sign up for the mailing list at http://groups.google.com/group/nats-timer.
+
 = License
 
 This script is released under the Creative Commons Attribution 3.0 License. More info at http://creativecommons.org/licenses/by/3.0/
