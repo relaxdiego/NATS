@@ -38,6 +38,7 @@
     document.getElementById("start").addEventListener("click", NATS.start, false);
     document.getElementById("pause").addEventListener("click", NATS.pause, false);
     document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
+    document.getElementById("toggleAnalog").addEventListener("click", NATS.toggleAnalog, false);
     document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
     document.getElementById("reset").addEventListener("keydown", function(e) { e.stopPropagation() }, false);
     document.getElementById("talkLength").addEventListener("keydown", function(e){ e.stopPropagation() }, false);
@@ -67,7 +68,7 @@
       case 32: NATS.toggleStartPause(); break;                                        // Spacebar            
       case 27: NATS.confirmReset(); break;                                            // ESC
       case 68: NATS.toggleDirection(); break;                                         // D
-      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; break;  // M
+      case 77: NATS.toggleMilliseconds(); break;  // M
     }
   }
 
@@ -258,19 +259,18 @@
   
   NATS.toggleAnalog = function(){
     NATS.analog = !NATS.analog;
-    if(NATS.analog) { 
-                      document.getElementById("time").setAttribute("class", "analog");
-                      document.getElementById("lights").setAttribute("class", "analog");
-                    }
-    else            { 
-                      document.getElementById("time").setAttribute("class", "digital");
-                      document.getElementById("lights").setAttribute("class", "digital");
-                    }
+    document.getElementById("time").setAttribute("class",   (NATS.analog ? "analog" : "digital"));
+    document.getElementById("lights").setAttribute("class", (NATS.analog ? "analog" : "digital"));
+    document.getElementById("toggleAnalog").value = (!NATS.analog ? "Show analog" : "Show digital");
   }
     
   NATS.toggleDirection = function(){
     NATS.htmlDirection.selectedIndex = (NATS.htmlDirection.selectedIndex==0) ? 1 : 0;
     NATS.setDirection();
+  }
+  
+  NATS.toggleMilliseconds = function(){
+    NATS.showMilliseconds = !NATS.showMilliseconds;
   }
 
   NATS.toggleStartPause = function(){
@@ -312,7 +312,8 @@ body {
 
 #start, 
 #pause, 
-#reset {
+#reset,
+#toggleAnalog {
   position: absolute;
   top: 5px;
   width: 90px;
@@ -329,6 +330,12 @@ body {
 
 #direction { 
   left: 100px;
+  position: absolute;
+  top: 5px;
+}
+
+#toggleAnalog { 
+  left: 210px;
   position: absolute;
   top: 5px;
 }
@@ -393,7 +400,7 @@ body.counting #start { display: none; }
 
 #time.analog {
   height: 600px;
-  top: 70px;
+  top: 30px;
 }
 
 #time.analog #counter,
@@ -426,6 +433,7 @@ body.counting #start { display: none; }
        <option>Count up</option>
        <option>Count down</option>
      </select>
+     <input type="button" id="toggleAnalog" value="Show analog" title="Toggle Analog/Digital (A)" />
      <div id="talkLengthContainer">max <input id="talkLength" value="15:00" title="Talk length in mm:ss format"/></div>
      <div id="timeToWarnContainer">warn <input id="timeToWarn" value="13:00" title="Time to warn in mm:ss format"/></div>
      <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
