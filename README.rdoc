@@ -11,7 +11,7 @@ OK OK, it's just a simple timer my friends and I built from scratch. Why? Becaus
 1. Download the zip/tarball
 2. Extract the zip/tarball
 3. Go inside the extracted directory
-4. Double-click on timer.html
+4. Double-click on index.html
 5. If the file didn't open in Firefox/Chrome/Safari/Webkit, repeat step 4!!!!1111 We don't like IE.
 6. Revel in the pure awesomeness of N.A.T.S!!!1111
 
