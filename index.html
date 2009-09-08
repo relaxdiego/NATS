@@ -129,10 +129,10 @@
       seconds = seconds * -1;
     }
 
-    if      (NATS.paused)                        { NATS.color = "#666"    }
-    else if (NATS.elapsedTime > NATS.talkLength) { NATS.color = "#f00"    }
-    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.color = "#fccc00" }
-    else                                         { NATS.color = "#090"    }
+    if      (NATS.paused)                        { NATS.color = "#666666" }
+    else if (NATS.elapsedTime > NATS.talkLength) { NATS.color = "#FF0000" }
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.color = "#FCCC00" }
+    else                                         { NATS.color = "#009900" }
 
     var ctx = document.getElementById('analog').getContext('2d');
     ctx.save();
@@ -140,8 +140,8 @@
     ctx.translate(300,300);
     ctx.scale(2,2);
     ctx.rotate(-Math.PI/2);
-    ctx.strokeStyle = "black";
-    ctx.fillStyle   = "white";
+    ctx.strokeStyle = "#000000";
+    ctx.fillStyle   = "#FFFFFF";
     ctx.fill();
     ctx.lineWidth = 8;
     ctx.lineCap = "round";
@@ -153,7 +153,7 @@
       ctx.rotate(Math.PI/6);
       ctx.moveTo(100,0);
       ctx.lineTo(120,0);
-      ctx.strokeStyle = "#333";
+      ctx.strokeStyle = "#333333";
       ctx.stroke();
     }
     ctx.restore();
@@ -166,7 +166,7 @@
         ctx.beginPath();
         ctx.moveTo(117,0);
         ctx.lineTo(120,0);
-        ctx.strokeStyle = "#333";
+        ctx.strokeStyle = "#333333";
         ctx.stroke();
       }
       ctx.rotate(Math.PI/30);
@@ -215,7 +215,7 @@
     ctx.beginPath();
     ctx.arc(95,0,10,0,Math.PI*2,true);
     ctx.stroke();
-    ctx.fillStyle = "#333";
+    ctx.fillStyle = "#333333";
     ctx.arc(0,0,3,0,Math.PI*2,true);
     ctx.fill();
     ctx.restore();
