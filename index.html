@@ -103,7 +103,7 @@
     NATS.milliseconds = NATS.time % 1000;
 
     // Redraw the counter    
-    if(NATS.analog){ NATS.redrawAnalog(NATS.hours, NATS.minutes, NATS.seconds, NATS.negative);                     }
+    if(NATS.analog){ NATS.redrawAnalog(NATS.hours, NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative);                     }
     else           { NATS.redrawDigital(NATS.hours, NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative); }
     
     // Update status of the timer
@@ -115,8 +115,10 @@
   
   // This pieceo of code was obtained from https://developer.mozilla.org/en/Canvas_tutorial/Basic_animations
   // under the MIT license as specified in this page https://developer.mozilla.org/Project:Copyrights
-  NATS.redrawAnalog = function(hours, minutes, seconds, negative){
+  NATS.redrawAnalog = function(hours, minutes, seconds, milliseconds, negative){
+    var offset = (milliseconds < 30) ? Math.PI/60 : 0;
     if(negative){
+      offset  = offset  * -1;
       hours   = hours   * -1;
       minutes = minutes * -1;
       seconds = seconds * -1;
@@ -194,7 +196,7 @@
 
     // Write seconds
     ctx.save();
-    ctx.rotate(seconds * Math.PI/30);
+    ctx.rotate(seconds * Math.PI/30 + offset);
     ctx.strokeStyle = NATS.color; 
     ctx.fillStyle = NATS.color;
     ctx.lineWidth = 6;
