@@ -51,6 +51,8 @@
     NATS.htmlMinuteHand   = document.getElementById("minuteHand");
     
     NATS.reset();
+    NATS.redraw();
+    setInterval(NATS.redraw, 10);
   }
   
   NATS.confirmReset = function(){
@@ -64,7 +66,7 @@
       case 32: NATS.toggleStartPause(); break;                                        // Spacebar            
       case 27: NATS.confirmReset(); break;                                            // ESC
       case 68: NATS.toggleDirection(); break;                                         // D
-      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; NATS.redraw(); break;  // M
+      case 77: NATS.showMilliseconds = !NATS.showMilliseconds; break;  // M
     }
   }
 
@@ -86,7 +88,6 @@
   NATS.pause = function(){
     clearInterval(NATS.timer);
     NATS.paused = true;
-    NATS.redraw();
   }
 
   NATS.redraw = function(){
@@ -110,27 +111,107 @@
   }  
   
   NATS.redrawAnalog = function(minutes, seconds, negative){
-    var offset = (NATS.countUp && !negative) ? 1 : -1
     if(negative){
       minutes = minutes * -1;
       seconds = seconds * -1;
     }
 
-    if(seconds!=NATS.previousSecond){
-      NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
-      setTimeout(function(){ NATS.htmlSecondHand.style.MozTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 50);
-      NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90 + offset) + "deg)";
-      setTimeout(function(){ NATS.htmlSecondHand.style.WebkitTransform = "rotate(" + (6 * seconds + 90) + "deg)"; }, 50);
-      NATS.previousSecond = seconds;
-    }
+    if      (NATS.paused)                        { NATS.color = "#666"   } 
+    else if (NATS.elapsedTime > NATS.talkLength) { NATS.color = "#f00"   }
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.color = "#cc0" } 
+    else                                         { NATS.color = "#090"   }
 
-    if(minutes!=NATS.previousMinute){
-      setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
-      setTimeout(function(){ NATS.htmlMinuteHand.style.MozTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 450);
-      setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90 + offset) + "deg)"; }, 400);
-      setTimeout(function(){ NATS.htmlMinuteHand.style.WebkitTransform = "rotate(" + (6 * minutes + 90) + "deg)"; }, 450);
-      NATS.previousMinute = minutes;
+    var ctx = document.getElementById('analog').getContext('2d');
+    ctx.save();
+    ctx.clearRect(0,0,600,600);
+    ctx.translate(300,300);
+    ctx.scale(2,2);
+    ctx.rotate(-Math.PI/2);
+    ctx.strokeStyle = "black";
+    ctx.fillStyle   = "white";
+    ctx.fill();
+    ctx.lineWidth = 8;
+    ctx.lineCap = "round";
+    
+    // Hour marks
+    ctx.save();
+    for (i=0;i<12;i++){
+      ctx.beginPath();
+      ctx.rotate(Math.PI/6);
+      ctx.moveTo(100,0);
+      ctx.lineTo(120,0);
+      ctx.strokeStyle = "#333";
+      ctx.stroke();
     }
+    ctx.restore();
+
+    // Minute marks
+    ctx.save();
+    ctx.lineWidth = 5;
+    for (i=0;i<60;i++){
+      if (i%5!=0) {
+        ctx.beginPath();
+        ctx.moveTo(117,0);
+        ctx.lineTo(120,0);
+        ctx.strokeStyle = "#333";
+        ctx.stroke();
+      }
+      ctx.rotate(Math.PI/30);
+    }
+    ctx.restore();
+
+    // // write Hours
+    // ctx.save();
+    // ctx.rotate( hr*(Math.PI/6) + (Math.PI/360)*NATS.minutes + (Math.PI/21600)*NATS.seconds )
+    // ctx.strokeStyle = "#D40000";
+    // ctx.fillStyle = "#D40000";
+    // ctx.lineWidth = 14;
+    // ctx.beginPath();
+    // ctx.moveTo(-20,0);
+    // ctx.lineTo(80,0);
+    // ctx.stroke();
+    // ctx.restore();
+
+    // write Minutes
+    ctx.save();
+    ctx.rotate( (Math.PI/30)*minutes + (Math.PI/1800)*seconds )
+    ctx.strokeStyle = NATS.color; 
+    ctx.fillStyle = NATS.color; 
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(-28,0);
+    ctx.lineTo(112,0);
+    ctx.stroke();
+    ctx.restore();
+
+    // Write seconds
+    ctx.save();
+    ctx.rotate(seconds * Math.PI/30);
+    ctx.strokeStyle = NATS.color; 
+    ctx.fillStyle = NATS.color;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(-30,0);
+    ctx.lineTo(83,0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0,0,10,0,Math.PI*2,true);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(95,0,10,0,Math.PI*2,true);
+    ctx.stroke();
+    ctx.fillStyle = "#333";
+    ctx.arc(0,0,3,0,Math.PI*2,true);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = NATS.color;
+    ctx.arc(0,0,142,0,Math.PI*2,true);
+    ctx.stroke();
+
+    ctx.restore();
   }
   
   NATS.redrawDigital = function(minutes, seconds, milliseconds, negative){
@@ -156,12 +237,10 @@
     NATS.elapsedTime = 0;
     NATS.startTime   = new Date();
     NATS.parseTimes();
-    NATS.redraw();
   }
 
   NATS.setDirection = function(){
     NATS.countUp = NATS.htmlDirection.selectedIndex==0;
-    NATS.redraw();
   }
 
   NATS.start = function(){
@@ -172,8 +251,14 @@
   
   NATS.toggleAnalog = function(){
     NATS.analog = !NATS.analog;
-    if(NATS.analog) { document.getElementById("time").setAttribute("class", "analog") ; NATS.redraw(); }
-    else            { document.getElementById("time").setAttribute("class", "digital");                }
+    if(NATS.analog) { 
+                      document.getElementById("time").setAttribute("class", "analog");
+                      document.getElementById("lights").setAttribute("class", "analog");
+                    }
+    else            { 
+                      document.getElementById("time").setAttribute("class", "digital");
+                      document.getElementById("lights").setAttribute("class", "digital");
+                    }
   }
     
   NATS.toggleDirection = function(){
@@ -187,7 +272,6 @@
   
   NATS.updateElapsedTime = function(){
     NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime();
-    NATS.redraw();
   }
   
   window.addEventListener("load", NATS.initialize, false);
@@ -299,30 +383,28 @@ body.paused #paused{
 body.counting #pause { display: inline; }
 body.counting #start { display: none; }
 
-#minuteHand,
-#secondHand { 
-  display: none;
-}
 
 #time.analog {
-  height: 400px;
-}
-
-#time.analog #minuteHand,
-#time.analog #secondHand {
-  display: block;
-  font-family: Courier, monospace;
-  font-size: 30px;
-  left: 200px;
-  position: absolute;
-  top: 175px;
-  width: 350px;
-  -moz-transform: rotate(90deg);
-  -webkit-transform: rotate(90deg);
+  height: 600px;
+  top: 30px;
 }
 
 #time.analog #counter,
 #time.analog #milliseconds {
+  display: none;
+}
+
+#time.digital #analog {
+  display: none;
+}
+
+#time.analog #analog {
+  display: block;
+  left: 350px;
+  position: absolute;
+}
+
+#lights.analog {
   display: none;
 }
 
@@ -343,8 +425,7 @@ body.counting #start { display: none; }
    </div>
    <div id="time">
      <span id="counter"> </span><span id="milliseconds"> </span>
-     <img src="images/minuteHand.png" id="minuteHand" />
-     <img src="images/secondHand.png" id="secondHand" />
+     <canvas id="analog" width="600" height="600"> </canvas>
    </div>
    <div id="lights">
      <img src="images/greenLight.png"  id="counting"/>
