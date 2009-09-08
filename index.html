@@ -116,9 +116,14 @@
   // This pieceo of code was obtained from https://developer.mozilla.org/en/Canvas_tutorial/Basic_animations
   // under the MIT license as specified in this page https://developer.mozilla.org/Project:Copyrights
   NATS.redrawAnalog = function(hours, minutes, seconds, milliseconds, negative){
-    var offset = (milliseconds < 30) ? Math.PI/60 : 0;
+    var offset = 0;
+    if      (NATS.elapsedTime==0)                 { offset = 0                }
+    else if (NATS.countUp && milliseconds < 30)   { offset = Math.PI/60       }
+    else if (!NATS.countUp && milliseconds > 970) { offset = -1 * Math.PI/60  }
+    else if (negative && milliseconds < 30)       { offset = -1 * Math.PI/60  }
+    else                                          { offset = 0                }
+
     if(negative){
-      offset  = offset  * -1;
       hours   = hours   * -1;
       minutes = minutes * -1;
       seconds = seconds * -1;
