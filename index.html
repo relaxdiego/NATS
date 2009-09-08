@@ -98,7 +98,7 @@
     NATS.time         = NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
     NATS.negative     = !NATS.countUp && NATS.timeLeft < 0;
     NATS.hours        = Math.floor(NATS.time/60000/60);
-    NATS.minutes      = Math.floor(NATS.time/60000);
+    NATS.minutes      = Math.floor(NATS.time/60000%60);
     NATS.seconds      = Math.floor((NATS.time%60000)/1000);
     NATS.milliseconds = NATS.time % 1000;
 
