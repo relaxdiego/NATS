@@ -13,6 +13,7 @@
   // really don't have to so that I won't end up overwriting
   // them unwittingly in two or more functions.
   NATS.analog           = false;  // Oooooooooooh  
+  NATS.clockMode        = false;   // Timer or clock mode?
   NATS.countUp          = true;   // Count up or down?
   NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
   NATS.hours            = 0;      // See NATS.redraw()
@@ -39,6 +40,7 @@
     document.getElementById("pause").addEventListener("click", NATS.pause, false);
     document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
     document.getElementById("toggleAnalog").addEventListener("click", NATS.toggleAnalog, false);
+    document.getElementById("mode").addEventListener("change", NATS.setMode, false);
     document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
     document.getElementById("reset").addEventListener("keydown", function(e) { e.stopPropagation() }, false);
     document.getElementById("talkLength").addEventListener("keydown", function(e){ e.stopPropagation() }, false);
@@ -47,6 +49,7 @@
     // Remember HTML elements to avoid re-traversing DOM
     NATS.htmlBody         = document.getElementsByTagName("body")[0];
     NATS.htmlDirection    = document.getElementById("direction");
+    NATS.htmlMode         = document.getElementById("mode");
     NATS.htmlCounter      = document.getElementById("counter");
     NATS.htmlMilliseconds = document.getElementById("milliseconds");
     NATS.htmlSecondHand   = document.getElementById("secondHand");
@@ -65,6 +68,7 @@
   NATS.handleKey = function(event){
     switch(event.keyCode){
       case 65: NATS.toggleAnalog(); break;        // A
+      case 67: NATS.toggleMode(); break;          // C
       case 32: NATS.toggleStartPause(); break;    // Spacebar
       case 27: NATS.confirmReset(); break;        // ESC
       case 68: NATS.toggleDirection(); break;     // D
@@ -97,10 +101,10 @@
     NATS.timeLeft     = NATS.talkLength - NATS.elapsedTime;
     NATS.time         = NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
     NATS.negative     = !NATS.countUp && NATS.timeLeft < 0;
-    NATS.hours        = Math.floor(NATS.time/60000/60);
-    NATS.minutes      = Math.floor(NATS.time/60000%60);
-    NATS.seconds      = Math.floor((NATS.time%60000)/1000);
-    NATS.milliseconds = NATS.time % 1000;
+    NATS.hours        = NATS.clockMode ? (new Date()).getHours()        : Math.floor(NATS.time/60000/60);
+    NATS.minutes      = NATS.clockMode ? (new Date()).getMinutes()      : Math.floor(NATS.time/60000%60);
+    NATS.seconds      = NATS.clockMode ? (new Date()).getSeconds()      : Math.floor((NATS.time%60000)/1000);
+    NATS.milliseconds = NATS.clockMode ? (new Date()).getMilliseconds() : NATS.time % 1000;
 
     // Redraw the counter    
     if(NATS.analog){ NATS.redrawAnalog(NATS.hours, NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative);  }
@@ -118,7 +122,7 @@
   NATS.redrawAnalog = function(hours, minutes, seconds, milliseconds, negative){
     // This adds the springy-ness to the second hand
     var offset = 0;
-    if      (NATS.paused ||
+    if      ((NATS.paused && !NATS.clockMode) ||
              (NATS.timeLeft > -1000 && NATS.timeLeft < 0))  { offset = 0                }
     else if (NATS.countUp && milliseconds < 30   )          { offset = Math.PI/60       }
     else if ((!NATS.countUp && milliseconds > 970) ||
@@ -131,7 +135,8 @@
       seconds = seconds * -1;
     }
 
-    if      (NATS.paused)                        { NATS.color = "#666666" }
+    if      (NATS.clockMode)                     { NATS.color = "#336699" }
+    else if (NATS.paused)                        { NATS.color = "#666666" }
     else if (NATS.elapsedTime > NATS.talkLength) { NATS.color = "#FF0000" }
     else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.color = "#FCCC00" }
     else                                         { NATS.color = "#009900" }
@@ -259,6 +264,10 @@
   NATS.setDirection = function(){
     NATS.countUp = NATS.htmlDirection.selectedIndex==0;
   }
+  
+  NATS.setMode = function(){
+    NATS.clockMode = NATS.htmlMode.selectedIndex==1;
+  }
 
   NATS.start = function(){
     NATS.paused    = false;
@@ -280,6 +289,11 @@
   
   NATS.toggleMilliseconds = function(){
     NATS.showMilliseconds = !NATS.showMilliseconds;
+  }
+
+  NATS.toggleMode = function(){
+    NATS.htmlMode.selectedIndex = (NATS.htmlMode.selectedIndex==0) ? 1 : 0;
+    NATS.setMode();
   }
 
   NATS.toggleStartPause = function(){
@@ -345,6 +359,12 @@ body {
 
 #toggleAnalog { 
   left: 210px;
+  position: absolute;
+  top: 5px;
+}
+
+#mode { 
+  left: 310px;
   position: absolute;
   top: 5px;
 }
@@ -443,6 +463,10 @@ body.counting #start { display: none; }
        <option>Count down</option>
      </select>
      <input type="button" id="toggleAnalog" value="Show analog" title="Toggle Analog/Digital (A)" />
+     <select id="mode" title="Mode (M)">
+       <option>Timer mode</option>
+       <option>Clock mode</option>
+     </select>
      <div id="talkLengthContainer">max <input id="talkLength" value="15:00" title="Talk length in mm:ss format"/></div>
      <div id="timeToWarnContainer">warn <input id="timeToWarn" value="13:00" title="Time to warn in mm:ss format"/></div>
      <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
