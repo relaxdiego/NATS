@@ -64,6 +64,11 @@
     document.getElementById("reset").blur();
     if(confirm("Are you sure you want to reset?")) NATS.reset();
   }
+  
+  NATS.getTimeOfDay = function(){
+    var t = new Date();
+    return (t.getTime() - t.getTimezoneOffset() * 60000) % 86400000;
+  }
 
   NATS.handleKey = function(event){
     switch(event.keyCode){
@@ -99,12 +104,12 @@
   NATS.redraw = function(){
     // Compute the timer's components
     NATS.timeLeft     = NATS.talkLength - NATS.elapsedTime;
-    NATS.time         = NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
-    NATS.negative     = !NATS.countUp && NATS.timeLeft < 0;
-    NATS.hours        = NATS.clockMode ? (new Date()).getHours()        : Math.floor(NATS.time/60000/60);
-    NATS.minutes      = NATS.clockMode ? (new Date()).getMinutes()      : Math.floor(NATS.time/60000%60);
-    NATS.seconds      = NATS.clockMode ? (new Date()).getSeconds()      : Math.floor((NATS.time%60000)/1000);
-    NATS.milliseconds = NATS.clockMode ? (new Date()).getMilliseconds() : NATS.time % 1000;
+    NATS.time         = NATS.clockMode ? NATS.getTimeOfDay() : NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
+    NATS.negative     = NATS.timeLeft < 0 && !NATS.countUp;
+    NATS.hours        = Math.floor(NATS.time/60000/60);
+    NATS.minutes      = Math.floor(NATS.time/60000%60);
+    NATS.seconds      = Math.floor((NATS.time%60000)/1000);
+    NATS.milliseconds = NATS.time % 1000;
 
     // Redraw the counter    
     if(NATS.analog){ NATS.redrawAnalog(NATS.hours, NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative);  }
@@ -182,7 +187,7 @@
 
     // write Hours
     ctx.save();
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = NATS.clockMode ? 1.0 : 0.5;
     ctx.rotate( hours*(Math.PI/6) + (Math.PI/360)*minutes + (Math.PI/21600)*seconds )
     ctx.strokeStyle = NATS.color;
     ctx.fillStyle = NATS.color;
@@ -209,8 +214,8 @@
     // Write seconds
     ctx.save();
     ctx.rotate(seconds * Math.PI/30 + offset);
-    ctx.strokeStyle = NATS.color; 
-    ctx.fillStyle = NATS.color;
+    ctx.strokeStyle = NATS.clockMode ? "#999999" : NATS.color; 
+    ctx.fillStyle = NATS.clockMode ? "#999999" : NATS.color;
     ctx.lineWidth = 6;
     ctx.beginPath();
     ctx.moveTo(-30,0);
