@@ -57,7 +57,7 @@
     
     NATS.reset();
     NATS.redraw();
-    setInterval(NATS.redraw, 10);
+    setInterval(NATS.redraw, 5);
   }
   
   NATS.confirmReset = function(){
@@ -128,11 +128,14 @@
     // This adds the springy-ness to the second hand
     var offset = 0;
     if      ((NATS.paused && !NATS.clockMode) ||
-             (NATS.timeLeft > -1000 && NATS.timeLeft < 0))  { offset = 0                }
-    else if (NATS.countUp && milliseconds < 30   )          { offset = Math.PI/60       }
+             (NATS.timeLeft > -1000 && NATS.timeLeft < 0))  { offset = 0                 }
+    else if (NATS.countUp && milliseconds < 30   )          { offset = Math.PI/90        }
+    else if (NATS.countUp && milliseconds < 90   )          { offset = - 1 * Math.PI/180 }
     else if ((!NATS.countUp && milliseconds > 970) ||
-             (negative && milliseconds < 30)         )      { offset = -1 * Math.PI/60  }
-    else                                                    { offset = 0                }
+             (negative && milliseconds < 30)         )      { offset = -1 * Math.PI/60   }
+    else if ((!NATS.countUp && milliseconds > 910) ||
+            (negative && milliseconds < 90)         )       { offset = Math.PI/180  }
+    else                                                    { offset = 0                 }
 
     if(negative){
       hours   = hours   * -1;
