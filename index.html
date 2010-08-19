@@ -3,78 +3,494 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-
-	<title>relaxdiego/NATS @ GitHub</title>
-	
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #8d3bf1;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #000000;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #72c40e; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #72c40e; }
-    h3 { text-align: center; color: #72c40e; }
-    a { color: #72c40e; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
-	
-</head>
-
-<body>
-  <a href="http://github.com/relaxdiego/NATS"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-
-  <div id="container">
-
-    <div class="download">
-      <a href="http://github.com/relaxdiego/NATS/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/relaxdiego/NATS/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
-
-    <h1><a href="http://github.com/relaxdiego/NATS">NATS</a>
-      <span class="small">by <a href="http://github.com/relaxdiego">relaxdiego</a></span></h1>
-
-    <div class="description">
-      It's really just a timer
-    </div>
-
-    <h2>Authors</h2>
-<p>Mark Maglana (mmaglana@gmail.com)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>Mark Maglana (mmaglana@gmail.com)<br/>      </p>
-
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/relaxdiego/NATS/zipball/master">zip</a> or
-      <a href="http://github.com/relaxdiego/NATS/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/relaxdiego/NATS</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/relaxdiego/NATS">relaxdiego/NATS</a>
-    </div>
-
-  </div>
-
+<script type="text/javascript">
+  //
+  // N.A.T.S. = Neo-Analytic Time Sequencer!!!!1111
+  // Licensed under the Creative Commons Attribution 3.0 License
+  // See README.rdoc for more information
+  //
   
+  var NATS = {}; // Create a 'namespace' for this script. Because I'm OC like that ;-)
+
+  // It's good to declare these variables here even if I
+  // really don't have to so that I won't end up overwriting
+  // them unwittingly in two or more functions.
+  NATS.analog           = false;  // Oooooooooooh  
+  NATS.clockMode        = false;   // Timer or clock mode?
+  NATS.countUp          = true;   // Count up or down?
+  NATS.elapsedTime      = 0;      // Milliseconds elapsed since time start
+  NATS.hours            = 0;      // See NATS.redraw()
+  NATS.milliseconds     = 0;      // See NATS.redraw()
+  NATS.minutes          = 0;      // See NATS.redraw()
+  NATS.negative         = false;  // See NATS.redraw()
+  NATS.paused           = true;   // Destroy planet Earth or not?
+  NATS.previousMinute   = 0;      // See NATS.redrawAnalog()
+  NATS.previousSecond   = 0;      // See NATS.redrawAnalog()
+  NATS.seconds          = 0;      // See NATS.redraw()
+  NATS.showMilliseconds = false;  // Ooooooh, what does this button do?
+  NATS.startTime        = null;   // It's like Star Date but more focused on the time part(?)
+  NATS.talkLength       = 0;      // Expected length of the talk in milliseconds
+  NATS.time             = 0;      // See NATS.redraw()
+  NATS.timeLeft         = 0;      // See NATS.redraw()
+  NATS.timeToWarn       = 0;      // Time in milliseconds when warning signal is displayed
+    
+  NATS.initialize = function() {
+    window.removeEventListener("load", NATS.initialize, false);
+    
+    // attach event handlers
+    document.addEventListener("keydown", NATS.handleKey, false);
+    document.getElementById("start").addEventListener("click", NATS.start, false);
+    document.getElementById("pause").addEventListener("click", NATS.pause, false);
+    document.getElementById("direction").addEventListener("change", NATS.setDirection, false);
+    document.getElementById("toggleAnalog").addEventListener("click", NATS.toggleAnalog, false);
+    document.getElementById("mode").addEventListener("change", NATS.setMode, false);
+    document.getElementById("reset").addEventListener("click", NATS.confirmReset, false);
+    document.getElementById("reset").addEventListener("keydown", function(e) { e.stopPropagation() }, false);
+    document.getElementById("talkLength").addEventListener("keydown", function(e){ e.stopPropagation() }, false);
+    document.getElementById("timeToWarn").addEventListener("keydown", function(e){ e.stopPropagation() }, false);    
+    
+    // Remember HTML elements to avoid re-traversing DOM
+    NATS.htmlBody         = document.getElementsByTagName("body")[0];
+    NATS.htmlDirection    = document.getElementById("direction");
+    NATS.htmlMode         = document.getElementById("mode");
+    NATS.htmlCounter      = document.getElementById("counter");
+    NATS.htmlMilliseconds = document.getElementById("milliseconds");
+    NATS.htmlSecondHand   = document.getElementById("secondHand");
+    NATS.htmlMinuteHand   = document.getElementById("minuteHand");
+    
+    NATS.reset();
+    NATS.redraw();
+    setInterval(NATS.redraw, 5);
+  }
+  
+  NATS.confirmReset = function(){
+    document.getElementById("reset").blur();
+    if(confirm("Are you sure you want to reset?")) NATS.reset();
+  }
+  
+  NATS.getTimeOfDay = function(){
+    var t = new Date();
+    return (t.getTime() - t.getTimezoneOffset() * 60000) % 86400000;
+  }
+
+  NATS.handleKey = function(event){
+    switch(event.keyCode){
+      case 65: NATS.toggleAnalog(); break;        // A
+      case 67: NATS.toggleMode(); break;          // C
+      case 32: NATS.toggleStartPause(); break;    // Spacebar
+      case 27: NATS.confirmReset(); break;        // ESC
+      case 68: NATS.toggleDirection(); break;     // D
+      case 77: NATS.toggleMilliseconds(); break;  // M
+    }
+  }
+
+  NATS.pad = function(num){
+    if(num < 10){ return ['0', num].join('') } 
+    else        { return num                 }
+  }
+  
+  NATS.parseTimes = function(){
+    var v = document.getElementById("talkLength").value.split(":");
+    if(v.length==1){ NATS.talkLength = v[0] * 1000;                } 
+    else           { NATS.talkLength = v[0] * 60000 + v[1] * 1000; }
+    
+    v = document.getElementById("timeToWarn").value.split(":");
+    if(v.length==1){ NATS.timeToWarn = v[0] * 1000;                } 
+    else           { NATS.timeToWarn = v[0] * 60000 + v[1] * 1000; }
+  }
+  
+  NATS.pause = function(){
+    clearInterval(NATS.timer);
+    NATS.paused = true;
+  }
+
+  NATS.redraw = function(){
+    // Compute the timer's components
+    NATS.timeLeft     = NATS.talkLength - NATS.elapsedTime;
+    NATS.time         = NATS.clockMode ? NATS.getTimeOfDay() : NATS.countUp ? NATS.elapsedTime : Math.abs(NATS.timeLeft);
+    NATS.negative     = NATS.timeLeft < 0 && !NATS.countUp;
+    NATS.hours        = Math.floor(NATS.time/60000/60);
+    NATS.minutes      = Math.floor(NATS.time/60000%60);
+    NATS.seconds      = Math.floor((NATS.time%60000)/1000);
+    NATS.milliseconds = NATS.time % 1000;
+
+    // Redraw the counter    
+    if(NATS.analog){ NATS.redrawAnalog(NATS.hours, NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative);  }
+    else           { NATS.redrawDigital(NATS.hours, NATS.minutes, NATS.seconds, NATS.milliseconds, NATS.negative); }
+    
+    // Update status of the timer
+    if      (NATS.paused)                        { NATS.htmlBody.setAttribute("class", "paused"  ) } 
+    else if (NATS.elapsedTime > NATS.talkLength) { NATS.htmlBody.setAttribute("class", "overtime") }
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.htmlBody.setAttribute("class", "warning" ) } 
+    else                                         { NATS.htmlBody.setAttribute("class", "counting") }
+  }  
+  
+  // This pieceo of code was obtained from https://developer.mozilla.org/en/Canvas_tutorial/Basic_animations
+  // under the MIT license as specified in this page https://developer.mozilla.org/Project:Copyrights
+  NATS.redrawAnalog = function(hours, minutes, seconds, milliseconds, negative){
+    // This adds the springy-ness to the second hand
+    var offset = 0;
+    if      ((NATS.paused && !NATS.clockMode) ||
+             (NATS.timeLeft > -1000 && NATS.timeLeft < 0))  { offset = 0                 }
+    else if (NATS.countUp && milliseconds < 30   )          { offset = Math.PI/90        }
+    else if (NATS.countUp && milliseconds < 90   )          { offset = - 1 * Math.PI/180 }
+    else if ((!NATS.countUp && milliseconds > 970) ||
+             (negative && milliseconds < 30)         )      { offset = -1 * Math.PI/60   }
+    else if ((!NATS.countUp && milliseconds > 910) ||
+            (negative && milliseconds < 90)         )       { offset = Math.PI/180  }
+    else                                                    { offset = 0                 }
+
+    if(negative){
+      hours   = hours   * -1;
+      minutes = minutes * -1;
+      seconds = seconds * -1;
+    }
+
+    if      (NATS.clockMode)                     { NATS.color = "#336699" }
+    else if (NATS.paused)                        { NATS.color = "#666666" }
+    else if (NATS.elapsedTime > NATS.talkLength) { NATS.color = "#FF0000" }
+    else if (NATS.elapsedTime > NATS.timeToWarn) { NATS.color = "#FCCC00" }
+    else                                         { NATS.color = "#009900" }
+
+    var ctx = document.getElementById('analog').getContext('2d');
+    ctx.save();
+    ctx.clearRect(0,0,600,600);
+    ctx.translate(300,300);
+    ctx.scale(2,2);
+    ctx.rotate(-Math.PI/2);
+    ctx.strokeStyle = "#000000";
+    ctx.fillStyle   = "#FFFFFF";
+    ctx.fill();
+    ctx.lineWidth = 8;
+    ctx.lineCap = "round";
+    
+    // Hour marks
+    ctx.save();
+    for (i=0;i<12;i++){
+      ctx.beginPath();
+      ctx.rotate(Math.PI/6);
+      ctx.moveTo(100,0);
+      ctx.lineTo(120,0);
+      ctx.strokeStyle = "#333333";
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Minute marks
+    ctx.save();
+    ctx.lineWidth = 5;
+    for (i=0;i<60;i++){
+      if (i%5!=0) {
+        ctx.beginPath();
+        ctx.moveTo(117,0);
+        ctx.lineTo(120,0);
+        ctx.strokeStyle = "#333333";
+        ctx.stroke();
+      }
+      ctx.rotate(Math.PI/30);
+    }
+    ctx.restore();
+
+    // write Hours
+    ctx.save();
+    ctx.globalAlpha = NATS.clockMode ? 1.0 : 0.5;
+    ctx.rotate( hours*(Math.PI/6) + (Math.PI/360)*minutes + (Math.PI/21600)*seconds )
+    ctx.strokeStyle = NATS.color;
+    ctx.fillStyle = NATS.color;
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(-20,0);
+    ctx.lineTo(80,0);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // write Minutes
+    ctx.save();
+    ctx.rotate( (Math.PI/30)*minutes + (Math.PI/1800)*seconds )
+    ctx.strokeStyle = NATS.color; 
+    ctx.fillStyle = NATS.color; 
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(-28,0);
+    ctx.lineTo(112,0);
+    ctx.stroke();
+    ctx.restore();
+
+    // Write seconds
+    ctx.save();
+    ctx.rotate(seconds * Math.PI/30 + offset);
+    ctx.strokeStyle = NATS.clockMode ? "#999999" : NATS.color; 
+    ctx.fillStyle = NATS.clockMode ? "#999999" : NATS.color;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(-30,0);
+    ctx.lineTo(83,0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0,0,10,0,Math.PI*2,true);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(95,0,10,0,Math.PI*2,true);
+    ctx.stroke();
+    ctx.fillStyle = "#333333";
+    ctx.arc(0,0,3,0,Math.PI*2,true);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = NATS.color;
+    ctx.arc(0,0,142,0,Math.PI*2,true);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+  
+  NATS.redrawDigital = function(hours, minutes, seconds, milliseconds, negative){
+    NATS.htmlCounter.innerHTML = (negative ? "-" : "") + NATS.pad(minutes) + ":" + NATS.pad(seconds); // concatenation is consistently faster than Array.join() in this case
+    NATS.redrawMils(milliseconds);
+  }
+
+  NATS.redrawMils = function(mils){
+    if(NATS.showMilliseconds){
+      if      (mils ==  0) { mils =  '.000'                 } 
+      else if (mils <  10) { mils = ['.00' , mils].join('') } // Array.join() seems to be faster than string concat in this case
+      else if (mils < 100) { mils = ['.0'  , mils].join('') }
+      else                 { mils = ['.'   , mils].join('') }
+      NATS.htmlMilliseconds.innerHTML = mils;
+      NATS.millisecondsCleared        = false;
+    } else if (!NATS.showMilliseconds && !NATS.millisecondsCleared){
+      NATS.htmlMilliseconds.innerHTML = '';  
+      NATS.millisecondsCleared        = true;
+    }     
+  }
+
+  NATS.reset = function(){
+    NATS.elapsedTime = 0;
+    NATS.startTime   = new Date();
+    NATS.parseTimes();
+  }
+
+  NATS.setDirection = function(){
+    NATS.countUp = NATS.htmlDirection.selectedIndex==0;
+  }
+  
+  NATS.setMode = function(){
+    NATS.clockMode = NATS.htmlMode.selectedIndex==1;
+  }
+
+  NATS.start = function(){
+    NATS.paused    = false;
+    NATS.startTime = new Date((new Date()).getTime() - NATS.elapsedTime); // Adust startTime as needed so that a paused timer can continue accordingly
+    NATS.timer     = setInterval(NATS.updateElapsedTime, 10);
+  }
+  
+  NATS.toggleAnalog = function(){
+    NATS.analog = !NATS.analog;
+    document.getElementById("time").setAttribute("class",   (NATS.analog ? "analog" : "digital"));
+    document.getElementById("lights").setAttribute("class", (NATS.analog ? "analog" : "digital"));
+    document.getElementById("toggleAnalog").value = (!NATS.analog ? "Show analog" : "Show digital");
+  }
+    
+  NATS.toggleDirection = function(){
+    NATS.htmlDirection.selectedIndex = (NATS.htmlDirection.selectedIndex==0) ? 1 : 0;
+    NATS.setDirection();
+  }
+  
+  NATS.toggleMilliseconds = function(){
+    NATS.showMilliseconds = !NATS.showMilliseconds;
+  }
+
+  NATS.toggleMode = function(){
+    NATS.htmlMode.selectedIndex = (NATS.htmlMode.selectedIndex==0) ? 1 : 0;
+    NATS.setMode();
+  }
+
+  NATS.toggleStartPause = function(){
+    NATS.paused ? NATS.start() : NATS.pause();
+  }
+  
+  NATS.updateElapsedTime = function(){
+    NATS.elapsedTime = (new Date()).getTime() - NATS.startTime.getTime();
+  }
+  
+  window.addEventListener("load", NATS.initialize, false);
+  
+</script>
+
+<style type="text/css">
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+#time {
+  display: block;
+  font-family: Courier, "Courier New", monospace;
+  font-size: 340px;
+  font-weight: bold;
+  height: 320px;
+  overflow: hidden;
+  padding: 15px;
+  position: absolute;
+  right: 20px;
+  text-align: right;
+  top: 50px;
+  width: 100%;
+}
+
+#counter { letter-spacing: -30px; }
+#milliseconds { font-size: 50px; }
+
+#start, 
+#pause, 
+#reset,
+#toggleAnalog {
+  position: absolute;
+  top: 5px;
+  width: 90px;
+}
+
+#start,
+#pause {
+  left: 5px;
+}
+
+#reset {
+  right: 5px;
+}
+
+#direction { 
+  left: 100px;
+  position: absolute;
+  top: 5px;
+}
+
+#toggleAnalog { 
+  left: 210px;
+  position: absolute;
+  top: 5px;
+}
+
+#mode { 
+  left: 310px;
+  position: absolute;
+  top: 5px;
+}
+
+#talkLengthContainer,
+#timeToWarnContainer {
+  position: absolute;
+  right: 200px;
+  text-align: right;
+  top: 5px;
+  width: 100px;
+}
+
+#talkLength,
+#timeToWarn {
+  height: 20px;
+  text-align: right;
+  width: 45px;
+}
+
+#timeToWarnContainer { right: 100px; }
+
+#lights {
+  float: right;
+  margin-right: 10px;
+  position: relative;
+  top: 400px;
+}
+
+#counting, 
+#warning, 
+#overtime {
+  opacity: 0.05;
+}
+
+body.counting #counting,
+body.warning  #warning,
+body.overtime #overtime {
+  opacity: 1.0;
+}
+
+#paused { display: none; }
+
+body.paused #paused{
+  display: block;
+  font-family: Courier, "Courier New", monospace;
+  font-size: 100px;
+  font-weight: bold;
+  letter-spacing: 10px;
+  opacity: 1.0;
+  position: absolute;
+  text-align: center;
+  top: 45px;
+  width: 100%;
+}
+
+#pause { display: none; }
+#start { display: inline; }
+body.counting #pause { display: inline; }
+body.counting #start { display: none; }
+
+
+#time.analog {
+  height: 600px;
+  top: 30px;
+}
+
+#time.analog #counter,
+#time.analog #milliseconds {
+  display: none;
+}
+
+#time.digital #analog {
+  display: none;
+}
+
+#time.analog #analog {
+  display: block;
+  left: 400px;
+  position: absolute;
+}
+
+#lights.analog {
+  display: none;
+}
+
+</style>
+
+</head>
+<body>
+   <div id="toolbar">
+     <input type="button" id="start" value="Start" title="Start timer (Spacebar)"/>
+     <input type="button" id="pause" value="Pause" title="Pause timer (Spacebar)" />
+     <select id="direction" title="Direction (D)">
+       <option>Count up</option>
+       <option>Count down</option>
+     </select>
+     <input type="button" id="toggleAnalog" value="Show analog" title="Toggle Analog/Digital (A)" />
+     <select id="mode" title="Mode (M)">
+       <option>Timer mode</option>
+       <option>Clock mode</option>
+     </select>
+     <div id="talkLengthContainer">max <input id="talkLength" value="15:00" title="Talk length in mm:ss format"/></div>
+     <div id="timeToWarnContainer">warn <input id="timeToWarn" value="13:00" title="Time to warn in mm:ss format"/></div>
+     <input type="button" id="reset" value="Reset" title="Reset timer (Esc)"/>
+   </div>
+   <div id="time">
+     <span id="counter"> </span><span id="milliseconds"> </span>
+     <canvas id="analog" width="600" height="600"> </canvas>
+   </div>
+   <div id="lights">
+     <img src="images/greenLight.png"  id="counting"/>
+     <img src="images/yellowLight.png" id="warning"/>
+     <img src="images/redLight.png"    id="overtime"/>
+     <div id="paused">(paused)</div>
+   </div>
 </body>
 </html>
